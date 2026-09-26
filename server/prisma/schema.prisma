@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum Relationship {
+  SPOUSE
+  SON
+  DAUGHTER
+  FATHER
+  MOTHER
+  BROTHER
+  SISTER
+  OTHER
+}
+
+model User {
+  id                 String        @id @default(uuid())
+  userId             String        @unique
+  passwordHash       String
+  role               Role
+  status             AccountStatus @default(ACTIVE)
+  mustChangePassword Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  member     Member?
+  salesMade  Sale[]   @relation("SaleCreatedBy")
+
+  @@index([role])
+}
+
+model Rank {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  sortOrder Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members Member[]
+}
+
+model Member {
+  id               String        @id @default(uuid())
+  userId           String        @unique
+  user             User          @relation(fields: [userId], references: [id])
+  memberCode       String        @unique
+  name             String
+  phone            String        @default("")
+  email            String        @default("")
+  address          String
+  dateOfBirth      DateTime
+  aadhaarNumber    String
+  panNumber        String
+  sponsorMemberId  String?
+  sponsor          Member?       @relation("MemberSponsor", fields: [sponsorMemberId], references: [id])
+  sponsees         Member[]      @relation("MemberSponsor")
+  bookingAmount    Decimal       @db.Decimal(14, 2)
+  nomineeName      String
+  relationship     Relationship
+  rankId           String
+  rank             Rank          @relation(fields: [rankId], references: [id])
+  status           AccountStatus @default(ACTIVE)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  sales Sale[]
+
+  commissionsEarned  Commission[] @relation("CommissionEarned")
+  commissionsSourced Commission[] @relation("CommissionSource")
+
+  @@index([memberCode])
+  @@index([name])
+  @@index([sponsorMemberId])
+}
+
+model Sale {
+  id              String   @id @default(uuid())
+  memberId        String
+  member          Member   @relation(fields: [memberId], references: [id])
+  plotReference   String
+  area            Decimal  @db.Decimal(12, 2)
+  amount          Decimal  @db.Decimal(14, 2)
+  saleDate        DateTime
+  createdByUserId String
+  createdBy       User     @relation("SaleCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([memberId])
+  @@index([saleDate])
+  @@index([plotReference])
+}
+
+model Commission {
+  id             String   @id @default(uuid())
+  memberId       String
+  member         Member   @relation("CommissionEarned", fields: [memberId], references: [id])
+  sourceMemberId String
+  sourceMember   Member   @relation("CommissionSource", fields: [sourceMemberId], references: [id])
+  bookingAmount  Decimal  @db.Decimal(14, 2)
+  percentage     Decimal  @db.Decimal(5, 2)
+  amount         Decimal  @db.Decimal(14, 2)
+  createdAt      DateTime @default(now())
+
+  @@index([memberId])
+  @@index([sourceMemberId])
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model MemberCodeCounter {
+  id      Int @id @default(1)
+  current Int @default(0)
+}
