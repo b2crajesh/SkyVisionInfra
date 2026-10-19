@@ -103,6 +103,12 @@ runs the compiled API. Build tools are listed as production dependencies so
 they are available in GoDaddy's build environment. Do not set the app's start
 command to `npm run dev`.
 
+The Prisma client uses the PostgreSQL driver adapter, so the running app does
+not depend on a host-installed OpenSSL shared library. Set `DATABASE_URL` in
+the hosting secrets before publishing; the app exits at startup if it is
+missing. Rebuild and republish after changing the Prisma schema or dependencies
+so the generated client and runtime packages match.
+
 ### Database safety
 
 The current Prisma schema is newer than the original checked-in migration. The

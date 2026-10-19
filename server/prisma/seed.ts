@@ -1,7 +1,18 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, Relationship } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 
-const prisma = new PrismaClient();
+dotenv.config();
+
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("Missing required environment variable: DATABASE_URL");
+}
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: databaseUrl }),
+});
 
 const RANKS = [
   { name: "Associate", sortOrder: 1 },
