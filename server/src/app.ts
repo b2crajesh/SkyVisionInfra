@@ -1,4 +1,6 @@
 import express, { Application } from "express";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -43,6 +45,20 @@ export function createApp(): Application {
   app.use("/api/dashboard", dashboardRoutes);
   app.use("/api/contact", contactRoutes);
   app.use("/api/commissions", commissionRoutes);
+
+  const clientBuildPath = path.resolve(__dirname, "../../client/dist");
+  if (existsSync(clientBuildPath)) {
+    app.use(express.static(clientBuildPath));
+    app.get("*", (req, res, next) => {
+      if (req.path === "/api" || req.path.startsWith("/api/")) {
+        next();
+        return;
+      }
+      res.sendFile(path.join(clientBuildPath, "index.html"), (error) => {
+        if (error) next(error);
+      });
+    });
+  }
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -31,10 +31,8 @@ copy server\.env.example server\.env
 copy client\.env.example client\.env
 # Edit server/.env if you changed DB credentials/ports; the defaults match docker-compose.yml.
 
-# 3. Install dependencies
-npm install --prefix server
-npm install --prefix client
-npm install   # root, for concurrently + convenience scripts
+# 3. Install dependencies for the root, server, and client
+npm run install:all
 
 # 4. Create the database schema
 npm run db:migrate
@@ -71,9 +69,75 @@ npm run dev
 |---|---|
 | `npm run dev` (root) | Runs server + client concurrently |
 | `npm run db:migrate` (root) | `prisma migrate dev` in `server/` |
+| `npm run db:migrate:deploy` (root) | Applies committed migrations with `prisma migrate deploy` |
 | `npm run db:seed` (root) | `prisma db seed` in `server/` |
 | `npm run db:generate` (root) | `prisma generate` in `server/` |
 | `npm run build` (root) | Builds server (tsc) and client (vite build) |
+
+## Production deployment on GoDaddy Node.js Hosting
+
+This project uses GoDaddy's Node.js Hosting GitHub deployment. The app now has
+root-level `build` and `start` scripts, compiles the API and client, and serves
+the React build from the Express app. Deploy it as one app on
+`https://skyvisioninfra.com`; API requests use the same origin at `/api`.
+
+GoDaddy's **Root path** setting controls a URL prefix, not the repository
+working directory. Keep it blank to serve the app at the domain root. Do not set
+it to `/server`.
+
+Configure production values under the app's **Settings → Secrets**. Never
+commit production values to `.env` files:
+
+| Name | Production value |
+|---|---|
+| `NODE_ENV` | `production` |
+| `DATABASE_URL` | The PostgreSQL URL from GoDaddy; encode reserved characters in credentials |
+| `JWT_SECRET` | A newly generated, long, random secret |
+| `JWT_EXPIRES_IN` | `15m` (or your chosen short-lived token policy) |
+| `CLIENT_ORIGIN` | `https://skyvisioninfra.com` |
+| `COOKIE_SECURE` | `true` |
+
+GoDaddy provides the assigned `PORT`. The root `build` script installs the
+server/client package dependencies and builds both apps; the root `start` script
+runs the compiled API. Build tools are listed as production dependencies so
+they are available in GoDaddy's build environment. Do not set the app's start
+command to `npm run dev`.
+
+### Database safety
+
+The current Prisma schema is newer than the original checked-in migration. The
+additional migration in this repository adds the missing
+`mustChangePassword`, `phone`, and `email` columns and the `Commission` table.
+It is additive and uses existence checks, but it does not replace inspecting
+the target database.
+
+- Take and verify a fresh database backup first.
+- Confirm the database is the one used by this app and that the original
+  `20260921105317_init` migration is recorded as applied in
+  `_prisma_migrations`. If migration history is missing, the schema differs,
+  or Prisma reports drift, stop and reconcile the database before deploying.
+- Only after that verification, run `npm run db:migrate:deploy` from the
+  repository root. Do not run a database migration from the Hosting preview
+  unless the database backup and migration history have been checked.
+- Do **not** run `prisma migrate dev`, `prisma db push`, `migrate reset`, or
+  `npm run db:seed` against production. The seed script creates demo accounts
+  and contains a fixed development admin password.
+
+### Smoke-test
+
+- Confirm `https://skyvisioninfra.com/health` returns `{"status":"ok"}`.
+- Open `https://skyvisioninfra.com`, test login with an existing non-demo
+  account, and verify authenticated API requests work over HTTPS.
+- Check the app logs if the health check or login fails. Do not paste secrets
+  or database connection strings into logs or support messages.
+
+### Production data-protection warning
+
+Member Aadhaar and PAN values are stored in the database. Although list
+responses mask these values, that does not encrypt the stored data. Before
+launching with real member data, confirm your legal and security requirements,
+restrict database access, and plan appropriate encryption, backups, retention,
+and incident-response controls.
 
 ## Security notes
 

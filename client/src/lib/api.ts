@@ -2,7 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined) ??
-  "http://localhost:4000/api";
+  (import.meta.env.PROD ? "/api" : "http://localhost:4000/api");
 
 export const api = axios.create({
   baseURL: BASE_URL,
