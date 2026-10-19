@@ -74,64 +74,42 @@ npm run dev
 | `npm run db:generate` (root) | `prisma generate` in `server/` |
 | `npm run build` (root) | Builds server (tsc) and client (vite build) |
 
-## Production deployment on GoDaddy cPanel
+## Production deployment on GoDaddy Node.js Hosting
 
-This project has a Node.js/Express API, a static React frontend, and a PostgreSQL
-database. A practical cPanel layout is the frontend at `https://skyvisioninfra.com`
-and the API at `https://api.skyvisioninfra.com`. Confirm that your GoDaddy plan
-supports a Node.js application on the API subdomain and permits that application
-to connect to its PostgreSQL database before proceeding.
+This project uses GoDaddy's Node.js Hosting GitHub deployment. The app now has
+root-level `build` and `start` scripts, compiles the API and client, and serves
+the React build from the Express app. Deploy it as one app on
+`https://skyvisioninfra.com`; API requests use the same origin at `/api`.
 
-### 1. Configure the domain and HTTPS
+GoDaddy's **Root path** setting controls a URL prefix, not the repository
+working directory. Keep it blank to serve the app at the domain root. Do not set
+it to `/server`.
 
-- Point `skyvisioninfra.com` to the cPanel website and create the
-  `api.skyvisioninfra.com` subdomain in cPanel.
-- Enable HTTPS certificates for both hostnames. Do not launch with HTTP-only
-  login cookies.
+Configure production values under the app's **Settings → Secrets**. Never
+commit production values to `.env` files:
 
-### 2. Build the frontend for the API hostname
+| Name | Production value |
+|---|---|
+| `NODE_ENV` | `production` |
+| `DATABASE_URL` | The PostgreSQL URL from GoDaddy; encode reserved characters in credentials |
+| `JWT_SECRET` | A newly generated, long, random secret |
+| `JWT_EXPIRES_IN` | `15m` (or your chosen short-lived token policy) |
+| `CLIENT_ORIGIN` | `https://skyvisioninfra.com` |
+| `COOKIE_SECURE` | `true` |
 
-From the repository root in PowerShell, set the API URL before building:
+GoDaddy provides the assigned `PORT`. The root `build` script installs the
+server/client package dependencies and builds both apps; the root `start` script
+runs the compiled API. Build tools are listed as production dependencies so
+they are available in GoDaddy's build environment. Do not set the app's start
+command to `npm run dev`.
 
-```powershell
-$env:VITE_API_URL = "https://api.skyvisioninfra.com/api"
-npm run build
-```
-
-Upload the **contents** of `client/dist/` to the domain's `public_html/`
-directory, including the generated `.htaccess`. The rewrite rule supports
-client-side routes when the browser refreshes a page.
-
-### 3. Configure the Node.js API application
-
-- In cPanel's Node.js application tool, select Node.js 20 or newer, set the
-  application URL to `api.skyvisioninfra.com`, the application root to the
-  uploaded `server/` directory, and the startup file to `dist/index.js`.
-- Upload the `server/` source, `package.json`, `package-lock.json`, and `prisma/`
-  directory. Install dependencies from cPanel, then run `npm run build` in the
-  server application root. The generated Prisma client must be available to
-  the running app; run `npx prisma generate` there if needed.
-- Configure these values using cPanel's application environment-variable
-  settings. Never commit production values to `.env` files:
-
-  | Name | Production value |
-  |---|---|
-  | `NODE_ENV` | `production` |
-  | `DATABASE_URL` | The exact PostgreSQL URL from cPanel; encode reserved characters in credentials |
-  | `JWT_SECRET` | A newly generated, long, random secret |
-  | `JWT_EXPIRES_IN` | `15m` (or your chosen short-lived token policy) |
-  | `CLIENT_ORIGIN` | `https://skyvisioninfra.com` |
-  | `COOKIE_SECURE` | `true` |
-
-  Let cPanel provide `PORT` to the app. Set database SSL options only as
-  specified by GoDaddy for your database.
-
-### 4. Verify the database before applying migrations
+### Database safety
 
 The current Prisma schema is newer than the original checked-in migration. The
-additional migration in this repository adds the missing `mustChangePassword`,
-`phone`, and `email` columns and the `Commission` table. It is additive and uses
-existence checks, but it does not replace inspecting the target database.
+additional migration in this repository adds the missing
+`mustChangePassword`, `phone`, and `email` columns and the `Commission` table.
+It is additive and uses existence checks, but it does not replace inspecting
+the target database.
 
 - Take and verify a fresh database backup first.
 - Confirm the database is the one used by this app and that the original
@@ -139,20 +117,19 @@ existence checks, but it does not replace inspecting the target database.
   `_prisma_migrations`. If migration history is missing, the schema differs,
   or Prisma reports drift, stop and reconcile the database before deploying.
 - Only after that verification, run `npm run db:migrate:deploy` from the
-  repository root (or `npx prisma migrate deploy` in `server/`).
+  repository root. Do not run a database migration from the Hosting preview
+  unless the database backup and migration history have been checked.
 - Do **not** run `prisma migrate dev`, `prisma db push`, `migrate reset`, or
   `npm run db:seed` against production. The seed script creates demo accounts
   and contains a fixed development admin password.
 
-### 5. Smoke-test
+### Smoke-test
 
-- Restart the Node.js application in cPanel.
-- Confirm `https://api.skyvisioninfra.com/health` returns
-  `{"status":"ok"}`.
+- Confirm `https://skyvisioninfra.com/health` returns `{"status":"ok"}`.
 - Open `https://skyvisioninfra.com`, test login with an existing non-demo
   account, and verify authenticated API requests work over HTTPS.
-- Check application logs in cPanel if the health check or login fails. Do not
-  paste secrets or database connection strings into logs or support messages.
+- Check the app logs if the health check or login fails. Do not paste secrets
+  or database connection strings into logs or support messages.
 
 ### Production data-protection warning
 
