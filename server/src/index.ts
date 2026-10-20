@@ -4,6 +4,8 @@ import { prisma } from "./utils/prisma";
 import { logError, logInfo } from "./utils/logger";
 
 async function start(): Promise<void> {
+  // eslint-disable-next-line no-console
+  console.log('test log');
   try {
     await prisma.$connect();
     logInfo("database.connected");
