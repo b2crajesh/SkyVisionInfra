@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { env } from "../utils/env";
+import { logError, logWarning } from "../utils/logger";
 
 export class ApiError extends Error {
   status: number;
@@ -51,6 +52,17 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
     message = "Invalid data supplied to database layer";
   } else if (err instanceof Error) {
     message = env.isProduction ? message : err.message;
+  }
+
+  const logFields = { method: req.method, path: req.path, status };
+  if (
+    status >= 500 ||
+    err instanceof Prisma.PrismaClientKnownRequestError ||
+    err instanceof Prisma.PrismaClientValidationError
+  ) {
+    logError("api.request.failed", err, logFields);
+  } else {
+    logWarning("api.request.rejected", { ...logFields, message });
   }
 
   if (!env.isProduction) {

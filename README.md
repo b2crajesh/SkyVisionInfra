@@ -109,6 +109,12 @@ the hosting secrets before publishing; the app exits at startup if it is
 missing. Rebuild and republish after changing the Prisma schema or dependencies
 so the generated client and runtime packages match.
 
+The server writes rotating request logs to `server/logs/access.log` and
+application/database startup events and errors to
+`server/logs/application.log` (14 daily files are retained). Ensure the hosting
+runtime can write to `server/logs`; these files are server-side diagnostics and
+must not be served publicly or committed with customer data.
+
 ### Database safety
 
 The current Prisma schema is newer than the original checked-in migration. The

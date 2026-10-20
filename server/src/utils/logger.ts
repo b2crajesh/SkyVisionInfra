@@ -13,3 +13,53 @@ export const accessLogStream = createStream("access.log", {
   maxFiles: 14,
   path: LOG_DIR,
 });
+
+export const applicationLogStream = createStream("application.log", {
+  interval: "1d",
+  maxFiles: 14,
+  path: LOG_DIR,
+});
+
+function sanitize(value: string): string {
+  return value
+    .replace(/(postgres(?:ql)?:\/\/[^:\s]+:)[^@\s]+@/gi, "$1[REDACTED]@")
+    .replace(/(password\s*[=:]\s*)[^\s,;]+/gi, "$1[REDACTED]");
+}
+
+function getErrorDetails(error: unknown): { name: string; message: string; code?: string } {
+  if (!(error instanceof Error)) {
+    return { name: "UnknownError", message: sanitize(String(error)) };
+  }
+
+  const code =
+    "code" in error && typeof error.code === "string" ? sanitize(error.code) : undefined;
+
+  return {
+    name: sanitize(error.name),
+    message: sanitize(error.message),
+    ...(code ? { code } : {}),
+  };
+}
+
+function writeLog(level: "INFO" | "WARN" | "ERROR", event: string, fields: object = {}): void {
+  applicationLogStream.write(
+    `${JSON.stringify({ timestamp: new Date().toISOString(), level, event, ...fields })}\n`
+  );
+}
+
+applicationLogStream.on("error", (error) => {
+  // eslint-disable-next-line no-console
+  console.error("Unable to write application log file:", error);
+});
+
+export function logInfo(event: string, fields: object = {}): void {
+  writeLog("INFO", event, fields);
+}
+
+export function logError(event: string, error: unknown, fields: object = {}): void {
+  writeLog("ERROR", event, { ...fields, error: getErrorDetails(error) });
+}
+
+export function logWarning(event: string, fields: object = {}): void {
+  writeLog("WARN", event, fields);
+}
