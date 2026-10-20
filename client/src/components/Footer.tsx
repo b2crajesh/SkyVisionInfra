@@ -38,9 +38,11 @@ export default function Footer() {
             Contact
           </h4>
           <ul className="space-y-2 text-sm text-white/70">
-            <li>Sky Vision Towers, Sector 62, Noida, Uttar Pradesh, India</li>
-            <li>+91 98765 43210</li>
-            <li>[REDACTED_EMAIL_ADDRESS]</li>
+            <li>Sky Vision Infra and Developers Pvt Ltd</li>
+            <li>Pd mall, Padrauna, Kushinagar</li>
+            <li><a href="tel:9838156555" className="hover:text-white">9838156555</a></li>
+            <li><a href="tel:7408787288" className="hover:text-white">7408787288</a></li>
+            <li><a href="mailto:support@skyvisioninfra.com" className="hover:text-white">support@skyvisioninfra.com</a></li>
             <li>Mon - Sat, 10:00 AM - 7:00 PM</li>
           </ul>
         </div>

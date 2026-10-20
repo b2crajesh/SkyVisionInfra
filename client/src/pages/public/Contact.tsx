@@ -128,11 +128,20 @@ export default function Contact() {
             <Card>
               <h3 className="mb-3 text-lg font-semibold text-navy">Office</h3>
               <p className="mb-1 text-sm text-charcoal/70">
-                Sky Vision Towers, Sector 62, Noida, Uttar Pradesh, India
+                Sky Vision Infra and Developers Pvt Ltd
               </p>
-              <p className="mb-1 text-sm text-charcoal/70">+91 98765 43210</p>
               <p className="mb-1 text-sm text-charcoal/70">
-                [REDACTED_EMAIL_ADDRESS]
+                Pd mall, Padrauna, Kushinagar
+              </p>
+              <p className="mb-1 text-sm text-charcoal/70">
+                <a href="tel:9838156555" className="hover:text-navy">9838156555</a>
+                {" / "}
+                <a href="tel:7408787288" className="hover:text-navy">7408787288</a>
+              </p>
+              <p className="mb-1 text-sm text-charcoal/70">
+                <a href="mailto:support@skyvisioninfra.com" className="hover:text-navy">
+                  support@skyvisioninfra.com
+                </a>
               </p>
               <p className="text-sm text-charcoal/70">
                 Monday - Saturday, 10:00 AM - 7:00 PM
