@@ -7,6 +7,7 @@ import { env } from "../utils/env";
 import { TOKEN_COOKIE_NAME } from "../middleware/auth";
 import { issueCsrfCookie } from "../middleware/csrf";
 import { LoginInput, ChangePasswordInput } from "../validators/auth.validators";
+import { logError, logWarning } from "../utils/logger";
 
 function toClientRole(role: "ADMIN" | "MEMBER"): "admin" | "member" {
   return role === "ADMIN" ? "admin" : "member";
@@ -27,6 +28,7 @@ export async function login(
   res: Response,
   next: NextFunction
 ): Promise<void> {
+  let phase = "user_lookup";
   try {
     const { userId, password } = req.body;
 
@@ -39,11 +41,13 @@ export async function login(
       throw new ApiError(401, "Invalid credentials");
     }
 
+    phase = "password_verification";
     const valid = await comparePassword(password, user.passwordHash);
     if (!valid) {
       throw new ApiError(401, "Invalid credentials");
     }
 
+    phase = "token_signing";
     const token = signToken({
       id: user.id,
       userId: user.userId,
@@ -51,9 +55,11 @@ export async function login(
       memberId: user.member?.id,
     });
 
+    phase = "session_cookie";
     setAuthCookie(res, token);
     issueCsrfCookie(res);
 
+    phase = "response";
     res.json({
       user: {
         id: user.id,
@@ -66,6 +72,14 @@ export async function login(
       },
     });
   } catch (err) {
+    const requestId = req.get("x-request-id");
+    const correlation = requestId && /^[\w-]{1,64}$/.test(requestId) ? { requestId } : {};
+
+    if (err instanceof ApiError) {
+      logWarning("auth.login.rejected", { status: err.status, ...correlation });
+    } else {
+      logError("auth.login.failed", err, { phase, ...correlation });
+    }
     next(err);
   }
 }
