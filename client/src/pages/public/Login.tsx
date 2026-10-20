@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { useState, type FormEvent } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import PublicLayout from "../../components/PublicLayout";
@@ -34,7 +35,39 @@ export default function Login() {
       };
       navigate(redirectPath ?? defaultPath[user.role], { replace: true });
     } catch (err) {
-      setError("Invalid user ID or password. Please try again.");
+      const status = err instanceof AxiosError ? err.response?.status : undefined;
+      const contentType =
+        err instanceof AxiosError ? err.response?.headers["content-type"] : undefined;
+      const isUnexpectedResponse =
+        err instanceof Error && err.message.startsWith("The sign-in service returned");
+      const reason = isUnexpectedResponse
+        ? "unexpected_response"
+        : status === 401
+          ? "authentication_rejected"
+          : err instanceof AxiosError && !err.response
+            ? "network_error"
+            : err instanceof AxiosError
+              ? "http_error"
+              : "unexpected_error";
+
+      // Do not log credentials, user IDs, response bodies, or raw request errors.
+      console.error("[login] Sign-in failed", {
+        reason,
+        status,
+        contentType: typeof contentType === "string" ? contentType : undefined,
+      });
+
+      if (status === 401) {
+        setError("Invalid user ID or password. Please try again.");
+      } else if (isUnexpectedResponse) {
+        setError("The sign-in service returned an unexpected response. Please contact support.");
+      } else if (err instanceof AxiosError && !err.response) {
+        setError("Unable to reach the sign-in service. Check your connection and try again.");
+      } else if (status !== undefined && status >= 500) {
+        setError("The sign-in service is temporarily unavailable. Please try again later.");
+      } else {
+        setError("Unable to sign in. Please try again or contact support.");
+      }
     } finally {
       setSubmitting(false);
     }

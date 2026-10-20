@@ -21,6 +21,13 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function isAuthUser(value: unknown): value is AuthUser {
+  if (typeof value !== "object" || value === null) return false;
+  if (!("id" in value) || typeof value.id !== "string") return false;
+  if (!("userId" in value) || typeof value.userId !== "string") return false;
+  return "role" in value && (value.role === "admin" || value.role === "member");
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,12 +51,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const login = useCallback(async (userId: string, password: string) => {
-    const { data } = await api.post<{ user: AuthUser }>("/auth/login", {
+    const response = await api.post<unknown>("/auth/login", {
       userId,
       password,
     });
-    setUser(data.user);
-    return data.user;
+    const data = response.data;
+    const contentType = response.headers["content-type"];
+    const user =
+      typeof data === "object" && data !== null && "user" in data ? data.user : undefined;
+
+    if (!isAuthUser(user)) {
+      throw new Error(
+        typeof contentType === "string" && contentType.includes("text/html")
+          ? "The sign-in service returned a web page instead of an authentication response."
+          : "The sign-in service returned an unexpected response."
+      );
+    }
+
+    setUser(user);
+    return user;
   }, []);
 
   const logout = useCallback(async () => {
