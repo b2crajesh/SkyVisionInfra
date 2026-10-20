@@ -42,9 +42,10 @@ function getErrorDetails(error: unknown): { name: string; message: string; code?
 }
 
 function writeLog(level: "INFO" | "WARN" | "ERROR", event: string, fields: object = {}): void {
-  applicationLogStream.write(
-    `${JSON.stringify({ timestamp: new Date().toISOString(), level, event, ...fields })}\n`
-  );
+  const line = JSON.stringify({ timestamp: new Date().toISOString(), level, event, ...fields });
+  applicationLogStream.write(`${line}\n`);
+  // eslint-disable-next-line no-console
+  console.log(line);
 }
 
 applicationLogStream.on("error", (error) => {
