@@ -91,7 +91,8 @@ commit production values to `.env` files:
 | Name | Production value |
 |---|---|
 | `NODE_ENV` | `production` |
-| `DATABASE_URL` | The PostgreSQL URL from GoDaddy; encode reserved characters in credentials |
+| `DATABASE_URL` | Neon pooled PostgreSQL URL (hostname includes `-pooler`); URL-encode reserved credential characters |
+| `DATABASE_URL_UNPOOLED` | Neon direct PostgreSQL URL for Prisma CLI migrations; URL-encode reserved credential characters |
 | `JWT_SECRET` | A newly generated, long, random secret |
 | `JWT_EXPIRES_IN` | `15m` (or your chosen short-lived token policy) |
 | `CLIENT_ORIGIN` | `https://skyvisioninfra.com` |
@@ -103,11 +104,13 @@ runs the compiled API. Build tools are listed as production dependencies so
 they are available in GoDaddy's build environment. Do not set the app's start
 command to `npm run dev`.
 
-The Prisma client uses the PostgreSQL driver adapter, so the running app does
-not depend on a host-installed OpenSSL shared library. Set `DATABASE_URL` in
-the hosting secrets before publishing; the app exits at startup if it is
-missing. Rebuild and republish after changing the Prisma schema or dependencies
-so the generated client and runtime packages match.
+The API uses Prisma's Neon serverless adapter with the pooled `DATABASE_URL`;
+Prisma CLI migration commands use `DATABASE_URL_UNPOOLED` through the schema's
+`directUrl`. Set both values in the hosting secrets before publishing. The app
+exits at startup if `DATABASE_URL` is missing. Rebuild and republish after
+changing the Prisma schema or dependencies so the generated client and runtime
+packages match. The local seed script continues to use the PostgreSQL `pg`
+adapter, so it can seed a standard PostgreSQL database during development.
 
 The server writes rotating request logs to `server/logs/access.log` and
 application/database startup events and errors to

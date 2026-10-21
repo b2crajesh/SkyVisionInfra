@@ -17,6 +17,9 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/adapter-neon": "^6.19.3",
+    "@prisma/adapter-pg": "^6.16.2",
+    "@prisma/client": "^6.16.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
@@ -24,8 +27,6 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^20.14.9",
-    "@prisma/adapter-pg": "^6.16.2",
-    "@prisma/client": "^6.16.2",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
