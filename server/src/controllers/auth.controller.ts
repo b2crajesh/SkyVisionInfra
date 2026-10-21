@@ -23,18 +23,28 @@ function setAuthCookie(res: Response, token: string) {
   });
 }
 
+function logLoginDiagnostic(event: string, details: Record<string, unknown> = {}): void {
+  // eslint-disable-next-line no-console
+  console.log(`[LOGIN] ${event} ${JSON.stringify(details)}`);
+}
+
 export async function login(
   req: Request<unknown, unknown, LoginInput>,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   let phase = "user_lookup";
+  logLoginDiagnostic("attempt_started");
   try {
     const { userId, password } = req.body;
 
     const user = await prisma.user.findUnique({
       where: { userId },
       include: { member: true },
+    });
+    logLoginDiagnostic("user_lookup_complete", {
+      found: Boolean(user),
+      active: user?.status === "ACTIVE",
     });
 
     if (!user || user.status !== "ACTIVE") {
@@ -43,6 +53,7 @@ export async function login(
 
     phase = "password_verification";
     const valid = await comparePassword(password, user.passwordHash);
+    logLoginDiagnostic("password_verification_complete", { valid });
     if (!valid) {
       throw new ApiError(401, "Invalid credentials");
     }
@@ -54,10 +65,12 @@ export async function login(
       role: user.role,
       memberId: user.member?.id,
     });
+    logLoginDiagnostic("token_signing_complete");
 
     phase = "session_cookie";
     setAuthCookie(res, token);
     issueCsrfCookie(res);
+    logLoginDiagnostic("session_cookies_issued");
 
     phase = "response";
     res.json({
@@ -71,13 +84,33 @@ export async function login(
         mustChangePassword: user.mustChangePassword,
       },
     });
+    logLoginDiagnostic("attempt_succeeded", { role: user.role });
   } catch (err) {
     const requestId = req.get("x-request-id");
     const correlation = requestId && /^[\w-]{1,64}$/.test(requestId) ? { requestId } : {};
+    const errorName = err instanceof Error ? err.name : "UnknownError";
+    const errorCode =
+      typeof err === "object" && err !== null && "code" in err && typeof err.code === "string"
+        ? err.code
+        : undefined;
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+            .replace(/(postgres(?:ql)?:\/\/[^:\s]+:)[^@\s]+@/gi, "$1[REDACTED]@")
+            .replace(/(password\s*[=:]\s*)[^\s,;]+/gi, "$1[REDACTED]")
+        : undefined;
 
     if (err instanceof ApiError) {
+      logLoginDiagnostic("attempt_rejected", { phase, status: err.status, ...correlation });
       logWarning("auth.login.rejected", { status: err.status, ...correlation });
     } else {
+      logLoginDiagnostic("attempt_failed", {
+        phase,
+        errorName,
+        errorCode,
+        errorMessage,
+        ...correlation,
+      });
       logError("auth.login.failed", err, { phase, ...correlation });
     }
     next(err);
