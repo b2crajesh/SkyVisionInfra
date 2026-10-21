@@ -100,9 +100,9 @@ commit production values to `.env` files:
 
 GoDaddy provides the assigned `PORT`. The root `build` script installs the
 server/client package dependencies and builds both apps; the root `start` script
-runs the compiled API. Build tools are listed as production dependencies so
-they are available in GoDaddy's build environment. Do not set the app's start
-command to `npm run dev`.
+runs the compiled API. Configure GoDaddy's start command as `npm start`; do not
+set it to `npm run dev`. Build tools are listed as production dependencies so
+they are available in GoDaddy's build environment.
 
 The API uses Prisma's Neon serverless adapter with the pooled `DATABASE_URL`;
 Prisma CLI migration commands use `DATABASE_URL_UNPOOLED` through the schema's

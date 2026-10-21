@@ -14,13 +14,13 @@
     "db:generate": "npm run prisma:generate --prefix server"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
     "prisma": "^7.10.1",
     "tsx": "^4.23.15"
   },
   "dependencies": {
     "@prisma/adapter-neon": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "concurrently": "^8.2.2",
     "dotenv": "^18.0.8"
   }
 }
