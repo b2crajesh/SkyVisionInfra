@@ -31,7 +31,8 @@ export default function Members() {
         params: {
           search: search || undefined,
           status: status || undefined,
-          sort: `${sort}:${sortDir}`,
+          sortBy: sort,
+          sortOrder: sortDir,
           page,
           pageSize: PAGE_SIZE,
         },
@@ -105,8 +106,8 @@ export default function Members() {
           }}
         >
           <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
         </select>
       </div>
 

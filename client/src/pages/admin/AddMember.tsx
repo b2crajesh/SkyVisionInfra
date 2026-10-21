@@ -91,7 +91,7 @@ export default function AddMember() {
         dateOfBirth: values.dateOfBirth,
         aadhaarNumber: values.aadhaarNumber,
         panNumber: values.panNumber.toUpperCase(),
-        sponsorMemberId: values.sponsorMemberId,
+        sponsorMemberId: values.sponsorMemberId === "COMP" ? null : values.sponsorMemberId,
         bookingAmount: Number(values.bookingAmount),
         nomineeName: values.nomineeName,
         relationship: values.relationship,

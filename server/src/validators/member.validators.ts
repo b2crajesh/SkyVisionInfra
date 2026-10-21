@@ -32,7 +32,7 @@ export const createMemberSchema = z.object({
   nomineeName: z.string().min(2, "nomineeName is required"),
   relationship: relationshipEnum,
   rankId: z.string().uuid("rankId must be a valid id"),
-  sponsorMemberId: z.string().min(1, "sponsorMemberId is required"),
+  sponsorMemberId: z.string().min(1, "sponsorMemberId is required").nullable(),
 });
 
 export type CreateMemberInput = z.infer<typeof createMemberSchema>;
