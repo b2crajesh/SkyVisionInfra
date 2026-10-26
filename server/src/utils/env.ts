@@ -20,8 +20,8 @@ export const env = {
   COOKIE_SECURE: (process.env.COOKIE_SECURE ?? "false").toLowerCase() === "true",
   isProduction: (process.env.NODE_ENV ?? "development") === "production",
   SMTP_HOST: process.env.SMTP_HOST ?? "smtpout.secureserver.net",
-  SMTP_PORT: Number(process.env.SMTP_PORT ?? 465),
-  SMTP_SECURE: (process.env.SMTP_SECURE ?? "true").toLowerCase() === "true",
+  SMTP_PORT: Number(process.env.SMTP_PORT ?? 587),
+  SMTP_SECURE: (process.env.SMTP_SECURE ?? "false").toLowerCase() === "false",
   SMTP_USER: process.env.SMTP_USER ?? "support@skyvisioninfra.com",
   SMTP_PASSWORD: process.env.SMTP_PASSWORD,
   CONTACT_EMAIL_FROM:
