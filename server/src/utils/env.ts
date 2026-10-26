@@ -27,6 +27,7 @@ export const env = {
   CONTACT_EMAIL_FROM:
     process.env.CONTACT_EMAIL_FROM ?? process.env.SMTP_USER ?? "support@skyvisioninfra.com",
   CONTACT_EMAIL_TO: process.env.CONTACT_EMAIL_TO ?? "support@skyvisioninfra.com",
+  ADMIN_RECOVERY_EMAIL: process.env.ADMIN_RECOVERY_EMAIL ?? "",
   WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN,
   WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID,
   WHATSAPP_API_VERSION: process.env.WHATSAPP_API_VERSION ?? "v21.0",

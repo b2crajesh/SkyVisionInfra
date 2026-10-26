@@ -43,6 +43,7 @@ export interface Sale {
   memberName?: string;
   plotReference: string;
   area: string;
+  rate: string;
   amount: string;
   saleDate: string;
 }

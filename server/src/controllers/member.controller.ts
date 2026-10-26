@@ -8,6 +8,7 @@ import { generateTempPassword } from "../utils/password";
 import { hashPassword } from "../utils/hash";
 import { calculateCommissionAmount, COMMISSION_PERCENTAGE } from "../services/commission";
 import { sendMemberCredentialsWhatsApp } from "../services/whatsapp";
+import { sendMemberCredentialsEmail } from "../services/memberCredentialsEmail";
 import { CreateMemberInput, UpdateMemberInput } from "../validators/member.validators";
 
 const memberInclude = {
@@ -184,7 +185,15 @@ export async function createMember(
       return { member, user };
     });
 
-    await sendMemberCredentialsWhatsApp(result.member.phone, result.user.userId, tempPassword);
+    const [email, whatsapp] = await Promise.all([
+      sendMemberCredentialsEmail(
+        result.member.email,
+        result.member.name,
+        result.user.userId,
+        tempPassword
+      ),
+      sendMemberCredentialsWhatsApp(result.member.phone, result.user.userId, tempPassword),
+    ]);
 
     res.status(201).json({
       member: serializeMember(result.member, result.user.userId),
@@ -192,6 +201,7 @@ export async function createMember(
         userId: result.user.userId,
         tempPassword,
       },
+      delivery: { email, whatsapp },
     });
   } catch (err) {
     next(err);
@@ -308,13 +318,22 @@ export async function resetMemberPassword(
       data: { passwordHash, mustChangePassword: true },
     });
 
-    await sendMemberCredentialsWhatsApp(member.phone, member.user.userId, tempPassword);
+    const [email, whatsapp] = await Promise.all([
+      sendMemberCredentialsEmail(
+        member.email,
+        member.name,
+        member.user.userId,
+        tempPassword
+      ),
+      sendMemberCredentialsWhatsApp(member.phone, member.user.userId, tempPassword),
+    ]);
 
     res.json({
       credentials: {
         userId: member.user.userId,
         tempPassword,
       },
+      delivery: { email, whatsapp },
     });
   } catch (err) {
     next(err);

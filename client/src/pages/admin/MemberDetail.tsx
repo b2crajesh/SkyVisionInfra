@@ -14,6 +14,7 @@ import { formatDate } from "../../lib/format";
 const saleColumns: Column<Sale>[] = [
   { key: "plotReference", header: "Plot Reference", render: (s) => s.plotReference },
   { key: "area", header: "Area", render: (s) => s.area },
+  { key: "rate", header: "Rate / sq. ft.", render: (s) => Number(s.rate).toLocaleString("en-IN") },
   { key: "amount", header: "Amount", render: (s) => Number(s.amount).toLocaleString("en-IN") },
   { key: "saleDate", header: "Sale Date", render: (s) => formatDate(s.saleDate) },
 ];
@@ -51,9 +52,14 @@ export default function MemberDetail() {
   const [deleteError, setDeleteError] = useState("");
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [resetCredentials, setResetCredentials] = useState<{ userId: string; tempPassword: string } | null>(
-    null
-  );
+  const [resetCredentials, setResetCredentials] = useState<{
+    userId: string;
+    tempPassword: string;
+    delivery: {
+      email: "sent" | "failed" | "skipped";
+      whatsapp: "sent" | "failed" | "skipped";
+    };
+  } | null>(null);
 
   const loadMember = () => {
     if (!id) return;
@@ -95,11 +101,15 @@ export default function MemberDetail() {
   const handleResetPassword = async () => {
     if (!id) return;
     try {
-      const { data } = await api.post<{ credentials: { userId: string; tempPassword: string } }>(
-        `/members/${id}/reset-password`
-      );
+      const { data } = await api.post<{
+        credentials: { userId: string; tempPassword: string };
+        delivery: {
+          email: "sent" | "failed" | "skipped";
+          whatsapp: "sent" | "failed" | "skipped";
+        };
+      }>(`/members/${id}/reset-password`);
       setShowResetConfirm(false);
-      setResetCredentials(data.credentials);
+      setResetCredentials({ ...data.credentials, delivery: data.delivery });
     } catch {
       setShowResetConfirm(false);
     }
@@ -218,13 +228,22 @@ export default function MemberDetail() {
       >
         {resetCredentials && (
           <div className="space-y-2">
-            <p>Share these new login credentials with the member:</p>
+            <p>New login credentials and delivery results:</p>
             <p>
               <strong>User ID:</strong> {resetCredentials.userId}
             </p>
             <p>
               <strong>Temporary Password:</strong> {resetCredentials.tempPassword}
             </p>
+            <p>Email delivery: {resetCredentials.delivery.email}</p>
+            <p>WhatsApp delivery: {resetCredentials.delivery.whatsapp}</p>
+            {(resetCredentials.delivery.email !== "sent" ||
+              resetCredentials.delivery.whatsapp !== "sent") && (
+              <p className="mt-2 text-amber-700">
+                One or more messages could not be delivered. Share the temporary credentials
+                securely with the member.
+              </p>
+            )}
           </div>
         )}
       </ConfirmDialog>

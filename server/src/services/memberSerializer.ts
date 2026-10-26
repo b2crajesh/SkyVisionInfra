@@ -30,6 +30,7 @@ export interface SerializedMember {
     id: string;
     plotReference: string;
     area: string;
+    rate: string;
     amount: string;
     saleDate: string;
   }[];
@@ -66,6 +67,7 @@ export function serializeMember(member: MemberWithRelations, userIdForLogin?: st
       id: s.id,
       plotReference: s.plotReference,
       area: s.area.toString(),
+      rate: s.rate.toString(),
       amount: s.amount.toString(),
       saleDate: s.saleDate.toISOString(),
     })),

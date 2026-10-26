@@ -87,7 +87,7 @@ export interface SaleFormValues {
   memberId: string;
   plotReference: string;
   area: string;
-  amount: string;
+  rate: string;
   saleDate: string;
 }
 
@@ -104,9 +104,9 @@ export function validateSaleForm(values: SaleFormValues): SaleFormErrors {
     errors.area = "Area must be a positive number.";
   }
 
-  const amount = Number(values.amount);
-  if (values.amount.trim() === "" || Number.isNaN(amount) || amount <= 0) {
-    errors.amount = "Amount must be a positive number.";
+  const rate = Number(values.rate);
+  if (values.rate.trim() === "" || Number.isNaN(rate) || rate <= 0) {
+    errors.rate = "Rate must be a positive number.";
   }
 
   if (!values.saleDate) errors.saleDate = "Sale date is required.";

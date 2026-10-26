@@ -32,7 +32,12 @@ export function issueCsrfCookie(res: Response): string {
   return token;
 }
 
-const EXEMPT_PATHS = new Set(["/api/auth/login", "/api/contact"]);
+const EXEMPT_PATHS = new Set([
+  "/api/auth/login",
+  "/api/auth/admin/password-recovery",
+  "/api/auth/admin/reset-password",
+  "/api/contact",
+]);
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export function csrfProtection(req: Request, res: Response, next: NextFunction): void {

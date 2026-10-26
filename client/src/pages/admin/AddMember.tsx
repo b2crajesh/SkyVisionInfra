@@ -53,6 +53,7 @@ export default function AddMember() {
   const [result, setResult] = useState<{
     userId: string;
     tempPassword: string;
+    delivery: { email: "sent" | "failed" | "skipped"; whatsapp: "sent" | "failed" | "skipped" };
   } | null>(null);
 
   useEffect(() => {
@@ -83,6 +84,10 @@ export default function AddMember() {
     try {
       const { data } = await api.post<{
         credentials: { userId: string; tempPassword: string };
+        delivery: {
+          email: "sent" | "failed" | "skipped";
+          whatsapp: "sent" | "failed" | "skipped";
+        };
       }>("/members", {
         name: values.name,
         phone: values.phone,
@@ -97,7 +102,11 @@ export default function AddMember() {
         relationship: values.relationship,
         rankId: values.rankId,
       });
-      setResult({ userId: data.credentials.userId, tempPassword: data.credentials.tempPassword });
+      setResult({
+        userId: data.credentials.userId,
+        tempPassword: data.credentials.tempPassword,
+        delivery: data.delivery,
+      });
     } catch (err) {
       toast("Failed to create member. Please check the details and try again.", "error");
     } finally {
@@ -266,6 +275,16 @@ export default function AddMember() {
         <div className="rounded-md bg-lightbg p-3 font-mono text-sm">
           <p>User ID: {result?.userId}</p>
           <p>Temporary Password: {result?.tempPassword}</p>
+        </div>
+        <div className="mt-4 space-y-1">
+          <p>Email delivery: {result?.delivery.email}</p>
+          <p>WhatsApp delivery: {result?.delivery.whatsapp}</p>
+          {(result?.delivery.email !== "sent" || result?.delivery.whatsapp !== "sent") && (
+            <p className="mt-2 text-amber-700">
+              One or more messages could not be delivered. Share the temporary credentials
+              securely with the member.
+            </p>
+          )}
         </div>
       </ConfirmDialog>
     </DashboardLayout>

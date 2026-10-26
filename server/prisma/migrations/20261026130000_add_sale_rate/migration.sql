@@ -1,0 +1,8 @@
+ALTER TABLE "Sale"
+  ADD COLUMN "rate" DECIMAL(14,2) NOT NULL DEFAULT 0;
+
+UPDATE "Sale"
+SET "rate" = COALESCE(ROUND("amount" / NULLIF("area", 0), 2), 0);
+
+ALTER TABLE "Sale"
+  ALTER COLUMN "rate" DROP DEFAULT;

@@ -1,4 +1,7 @@
 import { env } from "../utils/env";
+import { logError, logWarning } from "../utils/logger";
+
+export type CredentialDeliveryStatus = "sent" | "failed" | "skipped";
 
 export function isWhatsAppConfigured(): boolean {
   return Boolean(env.WHATSAPP_ACCESS_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID);
@@ -22,20 +25,20 @@ export async function sendMemberCredentialsWhatsApp(
   phone: string | null | undefined,
   userId: string,
   tempPassword: string
-): Promise<void> {
+): Promise<CredentialDeliveryStatus> {
   if (!phone) {
-    return;
+    return "skipped";
   }
 
   if (!isWhatsAppConfigured()) {
-    console.warn("WhatsApp is not configured (missing WHATSAPP_ACCESS_TOKEN/WHATSAPP_PHONE_NUMBER_ID); skipping credential message.");
-    return;
+    logWarning("member.credentials.whatsapp.skipped", { reason: "not_configured" });
+    return "skipped";
   }
 
   const to = toE164(phone);
   if (!to) {
-    console.warn(`WhatsApp: could not normalize phone number "${phone}"; skipping credential message.`);
-    return;
+    logWarning("member.credentials.whatsapp.skipped", { reason: "invalid_phone" });
+    return "skipped";
   }
 
   try {
@@ -69,10 +72,12 @@ export async function sendMemberCredentialsWhatsApp(
     );
 
     if (!response.ok) {
-      const body = await response.text();
-      console.error(`WhatsApp message send failed (${response.status}): ${body}`);
+      logWarning("member.credentials.whatsapp.failed", { status: response.status });
+      return "failed";
     }
+    return "sent";
   } catch (err) {
-    console.error("WhatsApp message send failed:", err);
+    logError("member.credentials.whatsapp.failed", err);
+    return "failed";
   }
 }

@@ -11,6 +11,7 @@ import { formatDate } from "../../lib/format";
 const saleColumns: Column<Sale>[] = [
   { key: "plotReference", header: "Plot Reference", render: (s) => s.plotReference },
   { key: "area", header: "Area", render: (s) => s.area },
+  { key: "rate", header: "Rate / sq. ft.", render: (s) => Number(s.rate).toLocaleString("en-IN") },
   { key: "amount", header: "Amount", render: (s) => Number(s.amount).toLocaleString("en-IN") },
   { key: "saleDate", header: "Sale Date", render: (s) => formatDate(s.saleDate) },
 ];

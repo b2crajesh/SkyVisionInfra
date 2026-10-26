@@ -20,7 +20,7 @@ const initialValues: SaleFormValues = {
   memberId: "",
   plotReference: "",
   area: "",
-  amount: "",
+  rate: "",
   saleDate: "",
 };
 
@@ -30,6 +30,10 @@ export default function AddSale() {
   const [errors, setErrors] = useState<SaleFormErrors>({});
   const [member, setMember] = useState<DropdownOption | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const amount =
+    Number(values.area) > 0 && Number(values.rate) > 0
+      ? (Number(values.area) * Number(values.rate)).toFixed(2)
+      : "";
 
   const update = (field: keyof SaleFormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -55,7 +59,7 @@ export default function AddSale() {
         memberId: formValues.memberId,
         plotReference: values.plotReference,
         area: Number(values.area),
-        amount: Number(values.amount),
+        rate: Number(values.rate),
         saleDate: values.saleDate,
       });
       toast("Sale recorded successfully.", "success");
@@ -92,18 +96,28 @@ export default function AddSale() {
             <FormField
               label="Area (sq. ft.)"
               type="number"
+              min="0"
+              step="0.01"
               value={values.area}
               error={errors.area}
               onChange={(e) => update("area", e.target.value)}
             />
             <FormField
-              label="Amount"
+              label="Rate (per sq. ft.)"
               type="number"
-              value={values.amount}
-              error={errors.amount}
-              onChange={(e) => update("amount", e.target.value)}
+              min="0"
+              step="0.01"
+              value={values.rate}
+              error={errors.rate}
+              onChange={(e) => update("rate", e.target.value)}
             />
           </div>
+          <FormField
+            label="Amount"
+            value={amount}
+            readOnly
+            hint="Calculated automatically as area × rate."
+          />
           <FormField
             label="Sale Date"
             type="date"

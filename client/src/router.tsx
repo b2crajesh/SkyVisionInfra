@@ -13,6 +13,8 @@ import Commission from "./pages/public/Commission";
 import FAQ from "./pages/public/FAQ";
 import Contact from "./pages/public/Contact";
 import Login from "./pages/public/Login";
+import ResetAdminPassword from "./pages/public/ResetAdminPassword";
+import ForgotAdminPassword from "./pages/public/ForgotAdminPassword";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import Terms from "./pages/public/Terms";
 import Disclaimer from "./pages/public/Disclaimer";
@@ -45,6 +47,8 @@ export default function AppRouter() {
       <Route path="/faq" element={<FAQ />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-admin-password" element={<ForgotAdminPassword />} />
+      <Route path="/reset-admin-password" element={<ResetAdminPassword />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/disclaimer" element={<Disclaimer />} />

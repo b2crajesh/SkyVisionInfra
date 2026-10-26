@@ -13,3 +13,16 @@ export const changePasswordSchema = z.object({
 });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export const adminRecoveryRequestSchema = z.object({
+  userId: z.string().trim().min(1, "userId is required").max(100),
+});
+
+export type AdminRecoveryRequestInput = z.infer<typeof adminRecoveryRequestSchema>;
+
+export const adminRecoveryResetSchema = z.object({
+  token: z.string().min(1, "token is required").max(256),
+  newPassword: z.string().min(12, "newPassword must be at least 12 characters").max(128),
+});
+
+export type AdminRecoveryResetInput = z.infer<typeof adminRecoveryResetSchema>;

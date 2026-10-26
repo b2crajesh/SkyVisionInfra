@@ -100,9 +100,14 @@ export default function Login() {
               {submitting ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-xs text-charcoal/50">
-            Trouble logging in? <Link to="/contact" className="text-gold hover:underline">Contact support</Link>.
-          </p>
+          <div className="mt-4 flex justify-between text-xs text-charcoal/50">
+            <Link to="/forgot-admin-password" className="text-gold hover:underline">
+              Forgot admin password?
+            </Link>
+            <Link to="/contact" className="text-gold hover:underline">
+              Contact support
+            </Link>
+          </div>
         </Card>
       </section>
     </PublicLayout>

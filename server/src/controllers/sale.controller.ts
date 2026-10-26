@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { ApiError } from "../middleware/errorHandler";
-import { CreateSaleInput } from "../validators/sale.validators";
+import { CreateSaleInput, UpdateSaleInput } from "../validators/sale.validators";
 
 function serializeSale(sale: Prisma.SaleGetPayload<{ include: { member: true } }>) {
   return {
@@ -12,6 +12,7 @@ function serializeSale(sale: Prisma.SaleGetPayload<{ include: { member: true } }
     memberCode: sale.member.memberCode,
     plotReference: sale.plotReference,
     area: sale.area.toString(),
+    rate: sale.rate.toString(),
     amount: sale.amount.toString(),
     saleDate: sale.saleDate.toISOString(),
     createdAt: sale.createdAt.toISOString(),
@@ -117,7 +118,8 @@ export async function createSale(
           memberId: input.memberId,
           plotReference: input.plotReference,
           area: input.area,
-          amount: input.amount,
+          rate: input.rate,
+          amount: new Prisma.Decimal(input.area).mul(input.rate).toDecimalPlaces(2),
           saleDate: new Date(input.saleDate),
           createdByUserId: req.user!.id,
         },
@@ -126,6 +128,58 @@ export async function createSale(
     });
 
     res.status(201).json({ sale: serializeSale(sale) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateSale(
+  req: Request<{ id: string }, unknown, UpdateSaleInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const input = req.body;
+    const member = await prisma.member.findUnique({ where: { id: input.memberId } });
+    if (!member) {
+      throw new ApiError(400, "memberId does not reference an existing member");
+    }
+
+    const existingSale = await prisma.sale.findUnique({ where: { id: req.params.id } });
+    if (!existingSale) {
+      throw new ApiError(404, "Sale not found");
+    }
+
+    const sale = await prisma.sale.update({
+      where: { id: req.params.id },
+      data: {
+        memberId: input.memberId,
+        plotReference: input.plotReference,
+        area: input.area,
+        rate: input.rate,
+        amount: new Prisma.Decimal(input.area).mul(input.rate).toDecimalPlaces(2),
+        saleDate: new Date(input.saleDate),
+      },
+      include: { member: true },
+    });
+
+    res.json({ sale: serializeSale(sale) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteSale(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await prisma.sale.deleteMany({ where: { id: req.params.id } });
+    if (result.count === 0) {
+      throw new ApiError(404, "Sale not found");
+    }
+    res.status(204).send();
   } catch (err) {
     next(err);
   }

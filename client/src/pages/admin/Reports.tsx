@@ -10,6 +10,7 @@ import { formatDate } from "../../lib/format";
 const columns: Column<Sale>[] = [
   { key: "memberCode", header: "Member", render: (s) => `${s.memberCode ?? ""} ${s.memberName ?? ""}` },
   { key: "plotReference", header: "Plot Reference", render: (s) => s.plotReference },
+  { key: "rate", header: "Rate / sq. ft.", render: (s) => Number(s.rate).toLocaleString("en-IN") },
   { key: "amount", header: "Amount", render: (s) => Number(s.amount).toLocaleString("en-IN") },
   { key: "saleDate", header: "Sale Date", render: (s) => formatDate(s.saleDate) },
 ];
@@ -47,7 +48,7 @@ export default function Reports() {
   useEffect(() => {
     api.get<DashboardSummary>("/dashboard/summary").then(({ data }) => setSummary(data));
     api
-      .get<{ sales: Sale[] }>("/sales", { params: { page: 1, pageSize: 10, sort: "saleDate:desc" } })
+      .get<{ sales: Sale[] }>("/sales", { params: { page: 1, pageSize: 10, sortBy: "saleDate", sortOrder: "desc" } })
       .then(({ data }) => setSales(data.sales));
     api
       .get<{ commissions: Commission[]; totalAmount: string }>("/commissions", {

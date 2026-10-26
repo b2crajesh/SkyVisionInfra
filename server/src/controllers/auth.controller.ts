@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "../utils/prisma";
 import { comparePassword, hashPassword } from "../utils/hash";
 import { signToken } from "../utils/jwt";
@@ -6,8 +7,134 @@ import { ApiError } from "../middleware/errorHandler";
 import { env } from "../utils/env";
 import { TOKEN_COOKIE_NAME } from "../middleware/auth";
 import { issueCsrfCookie } from "../middleware/csrf";
-import { LoginInput, ChangePasswordInput } from "../validators/auth.validators";
+import {
+  AdminRecoveryRequestInput,
+  AdminRecoveryResetInput,
+  LoginInput,
+  ChangePasswordInput,
+} from "../validators/auth.validators";
 import { logError, logWarning } from "../utils/logger";
+import { sendAdminPasswordRecoveryEmail } from "../services/adminPasswordRecoveryEmail";
+
+const ADMIN_RECOVERY_RESPONSE =
+  "If the admin account is eligible, a password reset link will be sent to the configured recovery email.";
+const ADMIN_RECOVERY_WINDOW_MS = 15 * 60 * 1000;
+const ADMIN_RECOVERY_MAX_ATTEMPTS = 5;
+const adminRecoveryAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function hashRecoveryToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+export function limitAdminPasswordRecovery(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  const now = Date.now();
+  const ip = req.ip || req.socket.remoteAddress || "unknown";
+  for (const [key, entry] of adminRecoveryAttempts) {
+    if (entry.resetAt <= now) adminRecoveryAttempts.delete(key);
+  }
+
+  const attempts = adminRecoveryAttempts.get(ip);
+  if (attempts && attempts.resetAt > now && attempts.count >= ADMIN_RECOVERY_MAX_ATTEMPTS) {
+    res.status(429).json({ message: "Too many recovery requests. Please try again later." });
+    return;
+  }
+
+  if (attempts && attempts.resetAt > now) {
+    attempts.count += 1;
+  } else {
+    adminRecoveryAttempts.set(ip, { count: 1, resetAt: now + ADMIN_RECOVERY_WINDOW_MS });
+  }
+  next();
+}
+
+export async function requestAdminPasswordRecovery(
+  req: Request<unknown, unknown, AdminRecoveryRequestInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = await prisma.user.findFirst({
+      where: { userId: req.body.userId, role: "ADMIN", status: "ACTIVE" },
+      select: { id: true },
+    });
+
+    if (user) {
+      const token = randomBytes(32).toString("base64url");
+      const tokenHash = hashRecoveryToken(token);
+      const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+      await prisma.$transaction(async (tx) => {
+        await tx.passwordResetToken.deleteMany({ where: { userId: user.id } });
+        await tx.passwordResetToken.create({
+          data: { userId: user.id, tokenHash, expiresAt },
+        });
+      });
+
+      const resetUrl = new URL("/reset-admin-password", env.CLIENT_ORIGIN);
+      resetUrl.searchParams.set("token", token);
+      await sendAdminPasswordRecoveryEmail(resetUrl.toString());
+    }
+
+    res.json({ message: ADMIN_RECOVERY_RESPONSE });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resetAdminPassword(
+  req: Request<unknown, unknown, AdminRecoveryResetInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const tokenHash = hashRecoveryToken(req.body.token);
+    const now = new Date();
+    const resetToken = await prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+      select: {
+        id: true,
+        userId: true,
+        expiresAt: true,
+        user: { select: { role: true, status: true } },
+      },
+    });
+
+    if (
+      !resetToken ||
+      resetToken.expiresAt <= now ||
+      resetToken.user.role !== "ADMIN" ||
+      resetToken.user.status !== "ACTIVE"
+    ) {
+      throw new ApiError(400, "This password reset link is invalid or expired.");
+    }
+
+    const passwordHash = await hashPassword(req.body.newPassword);
+    const consumed = await prisma.$transaction(async (tx) => {
+      const result = await tx.passwordResetToken.deleteMany({
+        where: { id: resetToken.id, expiresAt: { gt: now } },
+      });
+      if (result.count !== 1) return false;
+
+      await tx.user.update({
+        where: { id: resetToken.userId, role: "ADMIN", status: "ACTIVE" },
+        data: { passwordHash, mustChangePassword: false },
+      });
+      await tx.passwordResetToken.deleteMany({ where: { userId: resetToken.userId } });
+      return true;
+    });
+
+    if (!consumed) {
+      throw new ApiError(400, "This password reset link is invalid or expired.");
+    }
+    res.json({ message: "Admin password updated. You can now sign in." });
+  } catch (err) {
+    next(err);
+  }
+}
 
 function toClientRole(role: "ADMIN" | "MEMBER"): "admin" | "member" {
   return role === "ADMIN" ? "admin" : "member";
