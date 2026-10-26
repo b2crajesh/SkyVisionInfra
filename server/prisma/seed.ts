@@ -15,11 +15,11 @@ const prisma = new PrismaClient({
 });
 
 const RANKS = [
-  { name: "Associate", sortOrder: 1 },
-  { name: "Silver", sortOrder: 2 },
-  { name: "Gold", sortOrder: 3 },
-  { name: "Platinum", sortOrder: 4 },
-  { name: "Diamond", sortOrder: 5 },
+  { name: "Junior Executive", sortOrder: 1 },
+  { name: "Executive", sortOrder: 2 },
+  { name: "Senior Executive", sortOrder: 3 },
+  { name: "Manager", sortOrder: 4 },
+  { name: "Senior Manager", sortOrder: 5 },
 ];
 
 const ADMIN_USER_ID = "admin";
@@ -74,7 +74,7 @@ async function main() {
       bookingAmount: "500000.00",
       nomineeName: "Sunita Sharma",
       relationship: Relationship.SPOUSE,
-      rank: "Gold",
+      rank: "Senior Executive",
       sponsorCode: null as string | null,
     },
     {
@@ -87,7 +87,7 @@ async function main() {
       bookingAmount: "250000.00",
       nomineeName: "Venkatesh Iyer",
       relationship: Relationship.FATHER,
-      rank: "Silver",
+      rank: "Executive",
       sponsorCode: "SVI000001",
     },
     {
@@ -100,7 +100,7 @@ async function main() {
       bookingAmount: "750000.00",
       nomineeName: "Rekha Patil",
       relationship: Relationship.MOTHER,
-      rank: "Platinum",
+      rank: "Manager",
       sponsorCode: "SVI000001",
     },
   ];

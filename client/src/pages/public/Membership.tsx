@@ -5,27 +5,27 @@ import Reveal from "../../components/Reveal";
 
 const tiers = [
   {
-    name: "Associate",
+    name: "Junior Executive",
     description:
       "Entry-level membership for new participants. Access to your member dashboard, plot browsing, and referral tools.",
   },
   {
-    name: "Silver",
+    name: "Executive",
     description:
       "Awarded to members who reach an initial booking and sponsorship milestone, unlocking recognition within the network.",
   },
   {
-    name: "Gold",
+    name: "Senior Executive",
     description:
       "For members with a sustained record of qualifying activity and sponsorship, reflecting deeper engagement with the program.",
   },
   {
-    name: "Platinum",
+    name: "Manager",
     description:
       "A senior rank recognising long-standing members who have built substantial referral chains and transaction history.",
   },
   {
-    name: "Diamond",
+    name: "Senior Manager",
     description:
       "Our highest recognition tier, reserved for members with exceptional, sustained contribution to the network's growth.",
   },
