@@ -1,8 +1,14 @@
 import nodemailer from "nodemailer";
-import { ApiError } from "../middleware/errorHandler";
 import { CreateContactInput } from "../validators/contact.validators";
 import { env } from "../utils/env";
-import { logError } from "../utils/logger";
+import { logError, logWarning } from "../utils/logger";
+
+export type ContactEmailDeliveryStatus = "sent" | "failed" | "skipped";
+
+export interface ContactEmailDelivery {
+  support: ContactEmailDeliveryStatus;
+  acknowledgement: ContactEmailDeliveryStatus;
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -13,21 +19,17 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-export async function sendContactEmail(contact: CreateContactInput): Promise<void> {
+export async function sendContactEmail(
+  contact: CreateContactInput
+): Promise<ContactEmailDelivery> {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD } = env;
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD) {
-    throw new ApiError(
-      503,
-      "Your message was saved, but the contact email service is not configured. Please contact support directly.",
-      "CONTACT_EMAIL_NOT_CONFIGURED"
-    );
+    logWarning("contact.email.skipped", { reason: "not_configured" });
+    return { support: "skipped", acknowledgement: "skipped" };
   }
   if (!Number.isInteger(SMTP_PORT) || SMTP_PORT < 1 || SMTP_PORT > 65535) {
-    throw new ApiError(
-      503,
-      "Your message was saved, but the contact email service is misconfigured. Please contact support directly.",
-      "CONTACT_EMAIL_MISCONFIGURED"
-    );
+    logWarning("contact.email.skipped", { reason: "invalid_smtp_port" });
+    return { support: "skipped", acknowledgement: "skipped" };
   }
 
   const subject = contact.subject.replace(/[\r\n]+/g, " ").trim();
@@ -70,6 +72,9 @@ export async function sendContactEmail(contact: CreateContactInput): Promise<voi
       port: SMTP_PORT,
       secure: env.SMTP_SECURE,
       requireTLS: !env.SMTP_SECURE,
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 10_000,
       auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
     });
     const results = await Promise.allSettled([
@@ -92,26 +97,20 @@ export async function sendContactEmail(contact: CreateContactInput): Promise<voi
     ]);
     const failures = results.flatMap((result, index) =>
       result.status === "rejected"
-        ? [{ error: result.reason, recipient: index === 0 ? env.CONTACT_EMAIL_TO : contact.email }]
+        ? [{ error: result.reason, recipient: index === 0 ? "support" : "contact" }]
         : []
     );
     if (failures.length > 0) {
       for (const failure of failures) {
         logError("contact.email.failed", failure.error, { recipient: failure.recipient });
       }
-      throw new ApiError(
-        502,
-        "Your message was saved, but one or more email notifications could not be sent. Please contact support directly.",
-        "CONTACT_EMAIL_FAILED"
-      );
     }
+    return {
+      support: results[0].status === "fulfilled" ? "sent" : "failed",
+      acknowledgement: results[1].status === "fulfilled" ? "sent" : "failed",
+    };
   } catch (error) {
-    if (error instanceof ApiError) throw error;
     logError("contact.email.failed", error);
-    throw new ApiError(
-      502,
-      "Your message was saved, but one or more email notifications could not be sent. Please contact support directly.",
-      "CONTACT_EMAIL_FAILED"
-    );
+    return { support: "failed", acknowledgement: "failed" };
   }
 }

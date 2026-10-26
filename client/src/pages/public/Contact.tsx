@@ -17,6 +17,11 @@ interface ContactForm {
   message: string;
 }
 
+interface ContactResponse {
+  message: string;
+  emailDelivery: "processing";
+}
+
 const initialForm: ContactForm = {
   name: "",
   email: "",
@@ -51,8 +56,8 @@ export default function Contact() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      await api.post("/contact", form);
-      toast("Thank you - your message has been sent.", "success");
+      const { data } = await api.post<ContactResponse>("/contact", form);
+      toast(data.message, "success");
       setForm(initialForm);
       setErrors({});
     } catch (err) {
