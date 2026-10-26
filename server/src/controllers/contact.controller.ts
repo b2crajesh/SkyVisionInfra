@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../utils/prisma";
 import { CreateContactInput } from "../validators/contact.validators";
+import { sendContactEmail } from "../services/contactEmail";
 
 export async function createContactMessage(
   req: Request<unknown, unknown, CreateContactInput>,
@@ -12,6 +13,7 @@ export async function createContactMessage(
     const contact = await prisma.contactMessage.create({
       data: { name, email, phone, subject, message },
     });
+    await sendContactEmail({ name, email, phone, subject, message });
     res.status(201).json({ id: contact.id, message: "Thank you, we will get back to you shortly." });
   } catch (err) {
     next(err);

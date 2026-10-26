@@ -49,6 +49,10 @@ npm run dev
 # Server: http://localhost:4000   Client: http://localhost:5173
 ```
 
+In development, the API allows HTTP origins on `localhost`, `127.0.0.1`, or
+`[::1]` on any port, so Vite's fallback port works when its default is busy.
+Production CORS remains restricted to the exact `CLIENT_ORIGIN` value.
+
 ## Login
 
 - **Admin**: `userId: admin`, `password: Admin@12345` (seeded by
@@ -97,6 +101,20 @@ commit production values to `.env` files:
 | `JWT_EXPIRES_IN` | `15m` (or your chosen short-lived token policy) |
 | `CLIENT_ORIGIN` | `https://skyvisioninfra.com` |
 | `COOKIE_SECURE` | `true` |
+| `SMTP_HOST` | `smtp.secureserver.net` (default) |
+| `SMTP_PORT` | `465` (default; implicit TLS) |
+| `SMTP_SECURE` | `true` (default for port `465`; use `false` with port `587` for STARTTLS) |
+| `SMTP_USER` | `support@skyvisioninfra.com` (default) |
+| `SMTP_PASSWORD` | SMTP account password or app password |
+| `CONTACT_EMAIL_FROM` | `support@skyvisioninfra.com` (defaults to `SMTP_USER`) |
+| `CONTACT_EMAIL_TO` | Inbox for contact submissions (defaults to `support@skyvisioninfra.com`) |
+
+The contact form saves submissions to the database, emails the configured
+inbox, and sends a confirmation to the email address entered by the visitor.
+Configure the SMTP settings above as hosting secrets; if either email fails,
+the submission remains saved and the API reports the notification failure
+instead of claiming both emails were sent. Only `SMTP_PASSWORD` is required as
+a secret with the default mailbox settings.
 
 GoDaddy provides the assigned `PORT`. The root `build` script installs the
 server/client package dependencies and builds both apps; the root `start` script

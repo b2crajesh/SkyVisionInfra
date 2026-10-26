@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { isAxiosError } from "axios";
 import PublicLayout from "../../components/PublicLayout";
 import SectionHeading from "../../components/ui/SectionHeading";
 import Card from "../../components/ui/Card";
@@ -55,7 +56,13 @@ export default function Contact() {
       setForm(initialForm);
       setErrors({});
     } catch (err) {
-      toast("Something went wrong sending your message. Please try again.", "error");
+      const errorMessage = isAxiosError<{ message?: string }>(err)
+        ? err.response?.data?.message
+        : undefined;
+      toast(
+        errorMessage ?? "Something went wrong sending your message. Please try again.",
+        "error"
+      );
     } finally {
       setSubmitting(false);
     }

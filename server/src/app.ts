@@ -26,7 +26,28 @@ export function createApp(): Application {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.CLIENT_ORIGIN,
+      origin: (origin, callback) => {
+        if (origin === env.CLIENT_ORIGIN) {
+          callback(null, true);
+          return;
+        }
+
+        if (!env.isProduction && origin) {
+          try {
+            const url = new URL(origin);
+            const isLocalDevelopmentOrigin =
+              url.protocol === "http:" &&
+              ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+            callback(null, isLocalDevelopmentOrigin);
+            return;
+          } catch {
+            callback(null, false);
+            return;
+          }
+        }
+
+        callback(null, false);
+      },
       credentials: true,
     })
   );
