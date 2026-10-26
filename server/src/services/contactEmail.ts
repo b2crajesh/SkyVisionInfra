@@ -26,7 +26,10 @@ function redactDiagnostic(value: string, sensitiveValues: string[]): string {
   );
 }
 
-function getSmtpErrorDetails(error: unknown, sensitiveValues: string[]): object {
+function getSmtpErrorDetails(
+  error: unknown,
+  sensitiveValues: string[]
+): Record<string, string | number> {
   if (typeof error !== "object" || error === null) {
     return { message: redactDiagnostic(String(error), sensitiveValues) };
   }
@@ -53,6 +56,33 @@ function getSmtpErrorDetails(error: unknown, sensitiveValues: string[]): object 
     }
   }
   return details;
+}
+
+function logSmtpFailure(
+  error: unknown,
+  fields: Record<string, string | number | boolean>,
+  sensitiveValues: string[]
+): void {
+  const smtpError = getSmtpErrorDetails(error, sensitiveValues);
+  const code =
+    typeof smtpError.code === "string" ? smtpError.code.replace(/\s+/g, " ").slice(0, 40) : "UNKNOWN";
+  const summary = [smtpError.command, smtpError.message]
+    .filter((value): value is string => typeof value === "string")
+    .join(": ")
+    .replace(/\s+/g, " ")
+    .slice(0, 180);
+  const visibleDiagnostic = summary || "No SMTP error message available";
+
+  logError(
+    `contact.email.failed [${code}] ${visibleDiagnostic}`,
+    new Error(visibleDiagnostic),
+    {
+      ...fields,
+      smtpErrorCode: code,
+      smtpMessage: visibleDiagnostic,
+      smtpError,
+    }
+  );
 }
 
 function escapeHtml(value: string): string {
@@ -142,11 +172,11 @@ export async function sendContactEmail(
           durationMs: Date.now() - startedAt,
         });
       } catch (error) {
-        logError("contact.email.failed", new Error("SMTP delivery failed"), {
-          ...smtpDetails,
-          durationMs: Date.now() - startedAt,
-          smtpError: getSmtpErrorDetails(error, sensitiveValues),
-        });
+        logSmtpFailure(
+          error,
+          { ...smtpDetails, durationMs: Date.now() - startedAt },
+          sensitiveValues
+        );
         throw error;
       }
     };
@@ -173,12 +203,11 @@ export async function sendContactEmail(
       acknowledgement: results[1].status === "fulfilled" ? "sent" : "failed",
     };
   } catch (error) {
-    logError("contact.email.failed", new Error("SMTP transport setup failed"), {
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: env.SMTP_SECURE,
-      smtpError: getSmtpErrorDetails(error, [SMTP_USER, SMTP_PASSWORD, contact.email]),
-    });
+    logSmtpFailure(
+      error,
+      { host: SMTP_HOST, port: SMTP_PORT, secure: env.SMTP_SECURE },
+      [SMTP_USER, SMTP_PASSWORD, contact.email]
+    );
     return { support: "failed", acknowledgement: "failed" };
   }
 }
