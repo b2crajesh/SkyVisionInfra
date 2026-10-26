@@ -23,7 +23,14 @@ export function createApp(): Application {
 
   app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
   app.use(morgan("combined", { stream: accessLogStream }));
-  app.use(helmet());
+  app.use(
+    helmet({
+      strictTransportSecurity: {
+        maxAge: 31_536_000,
+        includeSubDomains: true,
+      },
+    })
+  );
   app.use(
     cors({
       origin: (origin, callback) => {

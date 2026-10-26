@@ -23,7 +23,7 @@ export const env = {
   SMTP_PORT: Number(process.env.SMTP_PORT ?? 465),
   SMTP_SECURE: (process.env.SMTP_SECURE ?? "true").toLowerCase() === "true",
   SMTP_USER: process.env.SMTP_USER ?? "support@skyvisioninfra.com",
-  SMTP_PASSWORD: process.env.SMTP_PASSWORD ?? "SkyVision@12345",
+  SMTP_PASSWORD: process.env.SMTP_PASSWORD,
   CONTACT_EMAIL_FROM:
     process.env.CONTACT_EMAIL_FROM ?? process.env.SMTP_USER ?? "support@skyvisioninfra.com",
   CONTACT_EMAIL_TO: process.env.CONTACT_EMAIL_TO ?? "support@skyvisioninfra.com",
