@@ -1,13 +1,58 @@
 import nodemailer from "nodemailer";
 import { CreateContactInput } from "../validators/contact.validators";
 import { env } from "../utils/env";
-import { logError, logWarning } from "../utils/logger";
+import { logError, logInfo, logWarning } from "../utils/logger";
 
 export type ContactEmailDeliveryStatus = "sent" | "failed" | "skipped";
 
 export interface ContactEmailDelivery {
   support: ContactEmailDeliveryStatus;
   acknowledgement: ContactEmailDeliveryStatus;
+}
+
+function redactDiagnostic(value: string, sensitiveValues: string[]): string {
+  let redacted = value;
+  for (const sensitiveValue of sensitiveValues) {
+    if (sensitiveValue) {
+      redacted = redacted.replace(
+        new RegExp(sensitiveValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+        "[REDACTED]"
+      );
+    }
+  }
+  return redacted.replace(
+    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
+    "[REDACTED_EMAIL]"
+  );
+}
+
+function getSmtpErrorDetails(error: unknown, sensitiveValues: string[]): object {
+  if (typeof error !== "object" || error === null) {
+    return { message: redactDiagnostic(String(error), sensitiveValues) };
+  }
+
+  const details: Record<string, string | number> = {};
+  for (const key of [
+    "name",
+    "message",
+    "code",
+    "command",
+    "responseCode",
+    "response",
+    "syscall",
+    "errno",
+    "address",
+    "port",
+    "host",
+  ]) {
+    const value = Reflect.get(error, key);
+    if (typeof value === "string") {
+      details[key] = redactDiagnostic(value, sensitiveValues);
+    } else if (typeof value === "number") {
+      details[key] = value;
+    }
+  }
+  return details;
 }
 
 function escapeHtml(value: string): string {
@@ -77,8 +122,36 @@ export async function sendContactEmail(
       socketTimeout: 10_000,
       auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
     });
+    const sensitiveValues = [SMTP_USER, SMTP_PASSWORD, contact.email];
+    const send = async (
+      recipient: "support" | "contact",
+      options: Parameters<typeof transporter.sendMail>[0]
+    ) => {
+      const startedAt = Date.now();
+      const smtpDetails = {
+        recipient,
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: env.SMTP_SECURE,
+      };
+      logInfo("contact.email.attempt_started", smtpDetails);
+      try {
+        await transporter.sendMail(options);
+        logInfo("contact.email.sent", {
+          ...smtpDetails,
+          durationMs: Date.now() - startedAt,
+        });
+      } catch (error) {
+        logError("contact.email.failed", new Error("SMTP delivery failed"), {
+          ...smtpDetails,
+          durationMs: Date.now() - startedAt,
+          smtpError: getSmtpErrorDetails(error, sensitiveValues),
+        });
+        throw error;
+      }
+    };
     const results = await Promise.allSettled([
-      transporter.sendMail({
+      send("support", {
         from: env.CONTACT_EMAIL_FROM ?? SMTP_USER,
         to: env.CONTACT_EMAIL_TO,
         replyTo: contact.email,
@@ -86,7 +159,7 @@ export async function sendContactEmail(
         text: supportMessageText,
         html: supportMessageHtml,
       }),
-      transporter.sendMail({
+      send("contact", {
         from: env.CONTACT_EMAIL_FROM ?? SMTP_USER,
         to: contact.email,
         replyTo: env.CONTACT_EMAIL_TO,
@@ -95,22 +168,17 @@ export async function sendContactEmail(
         html: acknowledgementHtml,
       }),
     ]);
-    const failures = results.flatMap((result, index) =>
-      result.status === "rejected"
-        ? [{ error: result.reason, recipient: index === 0 ? "support" : "contact" }]
-        : []
-    );
-    if (failures.length > 0) {
-      for (const failure of failures) {
-        logError("contact.email.failed", failure.error, { recipient: failure.recipient });
-      }
-    }
     return {
       support: results[0].status === "fulfilled" ? "sent" : "failed",
       acknowledgement: results[1].status === "fulfilled" ? "sent" : "failed",
     };
   } catch (error) {
-    logError("contact.email.failed", error);
+    logError("contact.email.failed", new Error("SMTP transport setup failed"), {
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: env.SMTP_SECURE,
+      smtpError: getSmtpErrorDetails(error, [SMTP_USER, SMTP_PASSWORD, contact.email]),
+    });
     return { support: "failed", acknowledgement: "failed" };
   }
 }
