@@ -38,8 +38,18 @@ const commissionColumns: Column<Commission>[] = [
   { key: "percentage", header: "Commission %", render: (c) => `${c.percentage}%` },
   {
     key: "amount",
-    header: "Commission Amount",
+    header: "Gross Commission",
     render: (c) => Number(c.amount).toLocaleString("en-IN"),
+  },
+  {
+    key: "tdsAmount",
+    header: "TDS (5%)",
+    render: (c) => Number(c.tdsAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 }),
+  },
+  {
+    key: "netAmount",
+    header: "Net Payable",
+    render: (c) => Number(c.netAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 }),
   },
   { key: "createdAt", header: "Date", render: (c) => formatDate(c.createdAt) },
 ];
@@ -51,7 +61,7 @@ export default function MemberDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [commissions, setCommissions] = useState<Commission[]>([]);
-  const [totalCommission, setTotalCommission] = useState(0);
+  const [commissionTotals, setCommissionTotals] = useState({ gross: 0, tds: 0, net: 0 });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -81,10 +91,19 @@ export default function MemberDetail() {
   useEffect(() => {
     if (!id) return;
     api
-      .get<{ commissions: Commission[]; totalAmount: string }>("/commissions", { params: { memberId: id } })
+      .get<{
+        commissions: Commission[];
+        totalGrossAmount: string;
+        totalTdsAmount: string;
+        totalNetAmount: string;
+      }>("/commissions", { params: { memberId: id } })
       .then(({ data }) => {
         setCommissions(data.commissions);
-        setTotalCommission(Number(data.totalAmount));
+        setCommissionTotals({
+          gross: Number(data.totalGrossAmount),
+          tds: Number(data.totalTdsAmount),
+          net: Number(data.totalNetAmount),
+        });
       })
       .catch(() => {});
   }, [id]);
@@ -185,13 +204,19 @@ export default function MemberDetail() {
           <Card>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-navy">Commissions Earned (as Sponsor)</h3>
-              <span className="text-xl font-bold text-navy">
-                {totalCommission.toLocaleString("en-IN", {
+              <div className="text-right">
+                <p className="text-xl font-bold text-navy">
+                  Net payable: {commissionTotals.net.toLocaleString("en-IN", {
                   style: "currency",
                   currency: "INR",
-                  maximumFractionDigits: 0,
-                })}
-              </span>
+                  maximumFractionDigits: 2,
+                  })}
+                </p>
+                <p className="text-xs text-charcoal/60">
+                  Gross {commissionTotals.gross.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })}
+                  {" | "}TDS to remit {commissionTotals.tds.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })}
+                </p>
+              </div>
             </div>
             <DataTable
               columns={commissionColumns}

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { ApiError } from "../middleware/errorHandler";
 import { CreateSaleInput, UpdateSaleInput } from "../validators/sale.validators";
-import { calculateCommissionAmount } from "../services/commission";
+import { calculateCommissionAmount, calculateCommissionBreakdown } from "../services/commission";
 
 function serializeSale(sale: Prisma.SaleGetPayload<{ include: { member: true } }>) {
   return {
@@ -140,7 +140,7 @@ export async function createSale(
             saleId: sale.id,
             baseAmount: sale.amount,
             percentage,
-            amount: calculateCommissionAmount(sale.amount, percentage),
+            ...calculateCommissionBreakdown(calculateCommissionAmount(sale.amount, percentage)),
           },
         });
       }
@@ -199,7 +199,7 @@ export async function updateSale(
             saleId: sale.id,
             baseAmount: sale.amount,
             percentage,
-            amount: calculateCommissionAmount(sale.amount, percentage),
+            ...calculateCommissionBreakdown(calculateCommissionAmount(sale.amount, percentage)),
           },
         });
       }

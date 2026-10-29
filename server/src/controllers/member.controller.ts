@@ -6,7 +6,7 @@ import { serializeMember } from "../services/memberSerializer";
 import { generateNextMemberCode } from "../services/memberIdGenerator";
 import { generateTempPassword } from "../utils/password";
 import { hashPassword } from "../utils/hash";
-import { calculateCommissionAmount } from "../services/commission";
+import { calculateCommissionAmount, calculateCommissionBreakdown } from "../services/commission";
 import { sendMemberCredentialsWhatsApp } from "../services/whatsapp";
 import { sendMemberCredentialsEmail } from "../services/memberCredentialsEmail";
 import { CreateMemberInput, UpdateMemberInput } from "../validators/member.validators";
@@ -276,7 +276,9 @@ export async function createMember(
             sourceMemberId: member.id,
             baseAmount: input.bookingAmount,
             percentage: sponsor.rank.commissionPercentage,
-            amount: calculateCommissionAmount(input.bookingAmount, sponsor.rank.commissionPercentage),
+            ...calculateCommissionBreakdown(
+              calculateCommissionAmount(input.bookingAmount, sponsor.rank.commissionPercentage)
+            ),
           },
         });
       }

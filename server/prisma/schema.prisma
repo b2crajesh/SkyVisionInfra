@@ -143,6 +143,9 @@ model Commission {
   baseAmount     Decimal        @db.Decimal(14, 2)
   percentage     Decimal        @db.Decimal(5, 2)
   amount         Decimal        @db.Decimal(14, 2)
+  tdsPercentage  Decimal        @db.Decimal(5, 2)
+  tdsAmount      Decimal        @db.Decimal(14, 2)
+  netAmount      Decimal        @db.Decimal(14, 2)
   createdAt      DateTime       @default(now())
 
   @@index([memberId])

@@ -79,5 +79,8 @@ export interface Commission {
   baseAmount: string;
   percentage: string;
   amount: string;
+  tdsPercentage: string;
+  tdsAmount: string;
+  netAmount: string;
   createdAt: string;
 }

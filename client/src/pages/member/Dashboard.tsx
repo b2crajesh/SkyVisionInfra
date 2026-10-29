@@ -29,7 +29,8 @@ function NetworkNodeCard({
 
   return (
     <div
-      className={`w-56 overflow-hidden rounded-xl border bg-white shadow-soft transition-shadow hover:shadow-card ${
+      tabIndex={0}
+      className={`group w-56 overflow-hidden rounded-xl border bg-white shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
         isCurrent ? "border-gold ring-2 ring-gold/20" : "border-slate-200"
       }`}
     >
@@ -47,12 +48,13 @@ function NetworkNodeCard({
             <p className="truncate font-semibold text-navy">{node.name}</p>
             {isCurrent && <span className="shrink-0 text-xs font-bold text-gold">YOU</span>}
           </div>
-          <p className="truncate text-xs text-charcoal/60">{node.memberCode}</p>
+          <p className="invisible h-4 truncate text-xs text-charcoal/60 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+            {node.memberCode}
+          </p>
         </div>
       </div>
-      <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2">
+      <div className="border-t border-slate-100 px-4 py-2">
         <span className="truncate text-xs font-medium text-charcoal/70">{node.rank}</span>
-        <Badge tone={node.status === "ACTIVE" ? "success" : "neutral"}>{node.status}</Badge>
       </div>
     </div>
   );
@@ -115,8 +117,18 @@ const commissionColumns: Column<Commission>[] = [
   { key: "percentage", header: "Commission %", render: (c) => `${c.percentage}%` },
   {
     key: "amount",
-    header: "Commission Amount",
+    header: "Gross Commission",
     render: (c) => Number(c.amount).toLocaleString("en-IN"),
+  },
+  {
+    key: "tdsAmount",
+    header: "TDS (5%)",
+    render: (c) => Number(c.tdsAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 }),
+  },
+  {
+    key: "netAmount",
+    header: "Net Payable",
+    render: (c) => Number(c.netAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 }),
   },
   { key: "createdAt", header: "Date", render: (c) => formatDate(c.createdAt) },
 ];
@@ -126,7 +138,7 @@ export default function MemberDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [commissions, setCommissions] = useState<Commission[]>([]);
-  const [totalCommission, setTotalCommission] = useState(0);
+  const [commissionTotals, setCommissionTotals] = useState({ gross: 0, tds: 0, net: 0 });
   const [network, setNetwork] = useState<MemberNetwork | null>(null);
   const [networkError, setNetworkError] = useState("");
 
@@ -143,10 +155,19 @@ export default function MemberDashboard() {
       .catch(() => setNetworkError("Unable to load your sponsor tree. Please try again later."));
 
     api
-      .get<{ commissions: Commission[]; totalAmount: string }>("/commissions/me")
+      .get<{
+        commissions: Commission[];
+        totalGrossAmount: string;
+        totalTdsAmount: string;
+        totalNetAmount: string;
+      }>("/commissions/me")
       .then(({ data }) => {
         setCommissions(data.commissions);
-        setTotalCommission(Number(data.totalAmount));
+        setCommissionTotals({
+          gross: Number(data.totalGrossAmount),
+          tds: Number(data.totalTdsAmount),
+          net: Number(data.totalNetAmount),
+        });
       })
       .catch(() => {});
   }, []);
@@ -226,14 +247,20 @@ export default function MemberDashboard() {
 
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-navy">Commission Earned</h3>
-              <span className="text-xl font-bold text-navy">
-                {totalCommission.toLocaleString("en-IN", {
+              <h3 className="text-lg font-semibold text-navy">Commission Summary</h3>
+              <div className="text-right">
+                <p className="text-xl font-bold text-navy">
+                  Net payable: {commissionTotals.net.toLocaleString("en-IN", {
                   style: "currency",
                   currency: "INR",
-                  maximumFractionDigits: 0,
-                })}
-              </span>
+                  maximumFractionDigits: 2,
+                  })}
+                </p>
+                <p className="text-xs text-charcoal/60">
+                  Gross {commissionTotals.gross.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })}
+                  {" | "}TDS to remit {commissionTotals.tds.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 })}
+                </p>
+              </div>
             </div>
             <DataTable
               columns={commissionColumns}
