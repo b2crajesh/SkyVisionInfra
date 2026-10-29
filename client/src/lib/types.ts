@@ -37,6 +37,15 @@ export interface Member {
   sales?: Sale[];
 }
 
+export interface MemberNetworkNode {
+  id: string;
+  memberCode: string;
+  name: string;
+  status: string;
+  rank: string;
+  sponsoredMembers: MemberNetworkNode[];
+}
+
 export interface Sale {
   id: string;
   memberId: string;

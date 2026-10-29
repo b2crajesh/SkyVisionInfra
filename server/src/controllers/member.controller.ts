@@ -22,6 +22,37 @@ const memberDetailInclude = {
   sales: { orderBy: { saleDate: "desc" } },
 } satisfies Prisma.MemberInclude;
 
+const networkMemberSelect = {
+  id: true,
+  name: true,
+  memberCode: true,
+  sponsorMemberId: true,
+  status: true,
+  rank: { select: { name: true } },
+} satisfies Prisma.MemberSelect;
+
+type NetworkMemberRecord = Prisma.MemberGetPayload<{ select: typeof networkMemberSelect }>;
+
+interface NetworkNode {
+  id: string;
+  name: string;
+  memberCode: string;
+  status: string;
+  rank: string;
+  sponsoredMembers: NetworkNode[];
+}
+
+function toNetworkNode(member: NetworkMemberRecord): NetworkNode {
+  return {
+    id: member.id,
+    name: member.name,
+    memberCode: member.memberCode,
+    status: member.status,
+    rank: member.rank.name,
+    sponsoredMembers: [],
+  };
+}
+
 export async function listMembers(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { search, status, sortBy, sortOrder, page, pageSize, forSponsor } = req.query as Record<
@@ -93,6 +124,61 @@ export async function getMyMember(req: Request, res: Response, next: NextFunctio
       throw new ApiError(404, "Member not found");
     }
     res.json({ member: serializeMember(member, member.user.userId) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getMyNetwork(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!req.user?.memberId) {
+      throw new ApiError(404, "No member profile linked to this account");
+    }
+
+    const member = await prisma.member.findUnique({
+      where: { id: req.user.memberId },
+      select: networkMemberSelect,
+    });
+    if (!member) {
+      throw new ApiError(404, "Member not found");
+    }
+
+    const sponsorChain: NetworkNode[] = [];
+    const visited = new Set([member.id]);
+    let sponsorId = member.sponsorMemberId;
+    while (sponsorId && !visited.has(sponsorId)) {
+      visited.add(sponsorId);
+      const sponsor = await prisma.member.findUnique({
+        where: { id: sponsorId },
+        select: networkMemberSelect,
+      });
+      if (!sponsor) break;
+      sponsorChain.unshift(toNetworkNode(sponsor));
+      sponsorId = sponsor.sponsorMemberId;
+    }
+
+    const tree = toNetworkNode(member);
+    const nodes = new Map([[member.id, tree]]);
+    let frontier = [member.id];
+    while (frontier.length > 0) {
+      const children = await prisma.member.findMany({
+        where: { sponsorMemberId: { in: frontier } },
+        select: networkMemberSelect,
+        orderBy: [{ name: "asc" }, { memberCode: "asc" }],
+      });
+      const nextFrontier: string[] = [];
+      for (const child of children) {
+        if (visited.has(child.id)) continue;
+        visited.add(child.id);
+        const childNode = toNetworkNode(child);
+        nodes.get(child.sponsorMemberId!)?.sponsoredMembers.push(childNode);
+        nodes.set(child.id, childNode);
+        nextFrontier.push(child.id);
+      }
+      frontier = nextFrontier;
+    }
+
+    res.json({ sponsorChain, member: tree });
   } catch (err) {
     next(err);
   }

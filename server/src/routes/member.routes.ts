@@ -12,6 +12,7 @@ import {
   deleteMember,
   getMemberById,
   getMyMember,
+  getMyNetwork,
   listMembers,
   resetMemberPassword,
   updateMember,
@@ -21,6 +22,7 @@ const router = Router();
 
 router.use(authenticate);
 
+router.get("/me/network", authorize("MEMBER"), getMyNetwork);
 router.get("/me", authorize("MEMBER"), getMyMember);
 router.get("/", authorize("ADMIN"), validate({ query: listMembersQuerySchema }), listMembers);
 router.get("/:id", authorize("ADMIN"), validate({ params: idParamSchema }), getMemberById);
