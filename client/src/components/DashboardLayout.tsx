@@ -49,11 +49,13 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col bg-lightbg md:flex-row">
       <aside className="hidden w-64 flex-col bg-navy text-white md:flex">
-        <div className="flex items-center gap-2 border-b border-white/10 px-6 py-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold text-xs font-bold text-white">
-            SV
-          </span>
-          <span className="font-bold">{title}</span>
+        <div className="flex flex-col items-start gap-2 border-b border-white/10 px-6 py-5">
+          <img
+            src="/logo-horizontal-transparent.png"
+            alt="Sky Vision Infra"
+            className="h-9 w-auto"
+          />
+          <span className="text-sm font-bold">{title}</span>
         </div>
         {navLinks}
         <div className="border-t border-white/10 p-4 text-xs text-white/60">
@@ -69,11 +71,13 @@ export default function DashboardLayout({
           />
           <aside className="relative flex h-full w-64 max-w-[85vw] flex-col overflow-y-auto bg-navy text-white">
             <div className="flex items-center justify-between gap-2 border-b border-white/10 px-6 py-5">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold text-xs font-bold text-white">
-                  SV
-                </span>
-                <span className="font-bold">{title}</span>
+              <div className="flex flex-col items-start gap-2">
+                <img
+                  src="/logo-horizontal-transparent.png"
+                  alt="Sky Vision Infra"
+                  className="h-9 w-auto"
+                />
+                <span className="text-sm font-bold">{title}</span>
               </div>
               <button
                 type="button"

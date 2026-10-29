@@ -7,11 +7,12 @@ export default function Footer() {
     <footer className="bg-navy text-white">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-12 sm:px-6 md:grid-cols-4 lg:px-8">
         <div>
-          <div className="mb-3 flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold text-sm font-bold text-white">
-              SV
-            </span>
-            <span className="text-lg font-bold">Sky Vision Infra</span>
+          <div className="mb-3">
+            <img
+              src="/logo-horizontal-transparent.png"
+              alt="Sky Vision Infra"
+              className="h-12 w-auto"
+            />
           </div>
           <p className="text-sm text-white/70">
             Building lasting value through land, property development, and a

@@ -28,13 +28,12 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/80 shadow-soft backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy text-sm font-bold text-white">
-            SV
-          </span>
-          <span className="text-lg font-bold text-navy">
-            Sky Vision <span className="text-gold">Infra</span>
-          </span>
+        <Link to="/" aria-label="Sky Vision Infra home" className="flex shrink-0 items-center">
+          <img
+            src="/logo-horizontal-transparent.png"
+            alt="Sky Vision Infra"
+            className="h-12 w-auto rounded-md bg-navy px-2 py-1"
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
