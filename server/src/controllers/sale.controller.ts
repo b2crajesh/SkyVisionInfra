@@ -5,6 +5,51 @@ import { ApiError } from "../middleware/errorHandler";
 import { CreateSaleInput, UpdateSaleInput } from "../validators/sale.validators";
 import { calculateCommissionAmount, calculateCommissionBreakdown } from "../services/commission";
 
+type RankedMember = Prisma.MemberGetPayload<{ include: { rank: true } }>;
+
+async function createDifferentialCommissions(
+  tx: Prisma.TransactionClient,
+  sale: { id: string; amount: Prisma.Decimal },
+  seller: RankedMember
+): Promise<void> {
+  const commissions: Prisma.CommissionCreateManyInput[] = [];
+  const visitedMemberIds = new Set<string>();
+  let currentMember: RankedMember | null = seller;
+  let previousCommissionPercent = 0;
+
+  while (currentMember && !visitedMemberIds.has(currentMember.id)) {
+    visitedMemberIds.add(currentMember.id);
+    const currentCommissionPercent = currentMember.rank.commissionPercentage;
+    const differentialPercent = currentCommissionPercent - previousCommissionPercent;
+
+    if (differentialPercent <= 0) break;
+
+    commissions.push({
+      type: "SALE",
+      memberId: currentMember.id,
+      sourceMemberId: seller.id,
+      saleId: sale.id,
+      baseAmount: sale.amount,
+      percentage: differentialPercent,
+      ...calculateCommissionBreakdown(
+        calculateCommissionAmount(sale.amount, differentialPercent)
+      ),
+    });
+
+    previousCommissionPercent = currentCommissionPercent;
+    currentMember = currentMember.sponsorMemberId
+      ? await tx.member.findUnique({
+          where: { id: currentMember.sponsorMemberId },
+          include: { rank: true },
+        })
+      : null;
+  }
+
+  if (commissions.length > 0) {
+    await tx.commission.createMany({ data: commissions });
+  }
+}
+
 function serializeSale(sale: Prisma.SaleGetPayload<{ include: { member: true } }>) {
   return {
     id: sale.id,
@@ -111,7 +156,7 @@ export async function createSale(
     const sale = await prisma.$transaction(async (tx) => {
       const member = await tx.member.findUnique({
         where: { id: input.memberId },
-        include: { sponsor: { include: { rank: true } } },
+        include: { rank: true },
       });
       if (!member) {
         throw new ApiError(400, "memberId does not reference an existing member");
@@ -130,20 +175,7 @@ export async function createSale(
         include: { member: true },
       });
 
-      if (member.sponsor) {
-        const percentage = member.sponsor.rank.commissionPercentage;
-        await tx.commission.create({
-          data: {
-            type: "SALE",
-            memberId: member.sponsor.id,
-            sourceMemberId: member.id,
-            saleId: sale.id,
-            baseAmount: sale.amount,
-            percentage,
-            ...calculateCommissionBreakdown(calculateCommissionAmount(sale.amount, percentage)),
-          },
-        });
-      }
+      await createDifferentialCommissions(tx, sale, member);
 
       return sale;
     });
@@ -164,7 +196,7 @@ export async function updateSale(
     const sale = await prisma.$transaction(async (tx) => {
       const member = await tx.member.findUnique({
         where: { id: input.memberId },
-        include: { sponsor: { include: { rank: true } } },
+        include: { rank: true },
       });
       if (!member) {
         throw new ApiError(400, "memberId does not reference an existing member");
@@ -189,20 +221,7 @@ export async function updateSale(
       });
 
       await tx.commission.deleteMany({ where: { saleId: sale.id } });
-      if (member.sponsor) {
-        const percentage = member.sponsor.rank.commissionPercentage;
-        await tx.commission.create({
-          data: {
-            type: "SALE",
-            memberId: member.sponsor.id,
-            sourceMemberId: member.id,
-            saleId: sale.id,
-            baseAmount: sale.amount,
-            percentage,
-            ...calculateCommissionBreakdown(calculateCommissionAmount(sale.amount, percentage)),
-          },
-        });
-      }
+      await createDifferentialCommissions(tx, sale, member);
 
       return sale;
     });

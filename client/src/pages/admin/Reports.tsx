@@ -113,9 +113,9 @@ export default function Reports() {
       </Card>
 
       <Card>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-semibold text-navy">Commission History</h2>
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <p className="text-xl font-bold text-navy">
               Net payable: {commissionTotals.net.toLocaleString("en-IN", {
                 style: "currency",

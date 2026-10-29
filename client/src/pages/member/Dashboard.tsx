@@ -30,7 +30,7 @@ function NetworkNodeCard({
   return (
     <div
       tabIndex={0}
-      className={`group w-56 overflow-hidden rounded-xl border bg-white shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+      className={`group w-full max-w-sm overflow-hidden rounded-xl border bg-white shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold xl:w-56 ${
         isCurrent ? "border-gold ring-2 ring-gold/20" : "border-slate-200"
       }`}
     >
@@ -48,7 +48,7 @@ function NetworkNodeCard({
             <p className="truncate font-semibold text-navy">{node.name}</p>
             {isCurrent && <span className="shrink-0 text-xs font-bold text-gold">YOU</span>}
           </div>
-          <p className="invisible h-4 truncate text-xs text-charcoal/60 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+          <p className="h-4 truncate text-xs text-charcoal/60 opacity-100 transition-opacity xl:invisible xl:opacity-0 xl:group-hover:visible xl:group-hover:opacity-100 xl:group-focus-within:visible xl:group-focus-within:opacity-100">
             {node.memberCode}
           </p>
         </div>
@@ -68,18 +68,18 @@ function NetworkBranch({
   isCurrent?: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex w-full flex-col items-center xl:w-auto">
       <NetworkNodeCard node={node} isCurrent={isCurrent} />
       {node.sponsoredMembers.length > 0 && (
         <>
-          <div className="h-7 w-px bg-slate-300" />
-          <ul className="relative flex items-start justify-center gap-6 before:absolute before:left-[7rem] before:right-[7rem] before:top-0 before:h-px before:bg-slate-300">
+          <div className="hidden h-7 w-px bg-slate-300 xl:block" />
+          <ul className="relative mt-4 flex w-full flex-col gap-3 border-l border-slate-300 pl-4 xl:mt-0 xl:w-auto xl:flex-row xl:items-start xl:justify-center xl:gap-6 xl:border-l-0 xl:pl-0 xl:before:absolute xl:before:left-[7rem] xl:before:right-[7rem] xl:before:top-0 xl:before:h-px xl:before:bg-slate-300">
             {node.sponsoredMembers.map((sponsoredMember) => (
               <li
                 key={sponsoredMember.id}
-                className="relative flex shrink-0 flex-col items-center before:absolute before:top-0 before:h-7 before:w-px before:bg-slate-300"
+                className="relative flex w-full flex-col items-center before:absolute before:left-[-1rem] before:top-6 before:h-px before:w-3 before:bg-slate-300 xl:w-auto xl:shrink-0 xl:before:left-0 xl:before:top-0 xl:before:h-7 xl:before:w-px"
               >
-                <div className="h-7" />
+                <div className="hidden h-7 xl:block" />
                 <NetworkBranch node={sponsoredMember} />
               </li>
             ))}
@@ -216,10 +216,10 @@ export default function MemberDashboard() {
             {networkError && <p className="text-sm text-red-600">{networkError}</p>}
             {!network && !networkError && <p className="text-sm text-charcoal/60">Loading sponsor tree...</p>}
             {network && (
-              <div className="overflow-x-auto rounded-xl bg-slate-50/70 p-6">
-                <div className="mx-auto flex min-w-max flex-col items-center">
+              <div className="overflow-x-hidden rounded-xl bg-slate-50/70 p-3 sm:p-6 xl:overflow-x-auto">
+                <div className="mx-auto flex w-full flex-col items-center xl:min-w-max">
                 {network.sponsorChain.map((sponsor) => (
-                  <div key={sponsor.id} className="flex flex-col items-center">
+                  <div key={sponsor.id} className="flex w-full flex-col items-center xl:w-auto">
                     <NetworkNodeCard node={sponsor} />
                     <div className="h-7 w-px bg-slate-300" />
                   </div>
@@ -246,9 +246,9 @@ export default function MemberDashboard() {
           </Card>
 
           <Card>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-lg font-semibold text-navy">Commission Summary</h3>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <p className="text-xl font-bold text-navy">
                   Net payable: {commissionTotals.net.toLocaleString("en-IN", {
                   style: "currency",

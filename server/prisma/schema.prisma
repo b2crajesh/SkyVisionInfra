@@ -124,7 +124,7 @@ model Sale {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  commission Commission?
+  commissions Commission[]
 
   @@index([memberId])
   @@index([saleDate])
@@ -138,7 +138,7 @@ model Commission {
   member         Member         @relation("CommissionEarned", fields: [memberId], references: [id])
   sourceMemberId String
   sourceMember   Member         @relation("CommissionSource", fields: [sourceMemberId], references: [id])
-  saleId         String?        @unique
+  saleId         String?
   sale           Sale?          @relation(fields: [saleId], references: [id], onDelete: Cascade)
   baseAmount     Decimal        @db.Decimal(14, 2)
   percentage     Decimal        @db.Decimal(5, 2)
@@ -150,6 +150,7 @@ model Commission {
 
   @@index([memberId])
   @@index([sourceMemberId])
+  @@index([saleId])
 }
 
 model ContactMessage {

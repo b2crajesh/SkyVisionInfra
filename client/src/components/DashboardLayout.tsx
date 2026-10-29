@@ -67,7 +67,7 @@ export default function DashboardLayout({
             className="fixed inset-0 bg-black/50"
             onClick={() => setMobileNavOpen(false)}
           />
-          <aside className="relative flex w-64 flex-col bg-navy text-white">
+          <aside className="relative flex h-full w-64 max-w-[85vw] flex-col overflow-y-auto bg-navy text-white">
             <div className="flex items-center justify-between gap-2 border-b border-white/10 px-6 py-5">
               <div className="flex items-center gap-2">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold text-xs font-bold text-white">
@@ -92,7 +92,7 @@ export default function DashboardLayout({
         </div>
       )}
 
-      <div className="flex flex-1 flex-col overflow-x-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         <header className="flex items-center justify-between gap-2 bg-white px-4 py-3 shadow-soft md:px-8">
           <div className="flex items-center gap-3">
             <button
@@ -121,7 +121,7 @@ export default function DashboardLayout({
             </Button>
           </div>
         </header>
-        <main className="flex-1 overflow-x-hidden p-4 md:p-8">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-hidden p-3 sm:p-4 md:p-8">{children}</main>
       </div>
     </div>
   );
