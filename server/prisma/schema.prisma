@@ -31,6 +31,11 @@ enum Relationship {
   OTHER
 }
 
+enum CommissionType {
+  JOINING
+  SALE
+}
+
 model User {
   id                 String        @id @default(uuid())
   userId             String        @unique
@@ -61,11 +66,12 @@ model PasswordResetToken {
 }
 
 model Rank {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  sortOrder Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String   @id @default(uuid())
+  name                  String   @unique
+  sortOrder             Int
+  commissionPercentage  Int
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   members Member[]
 }
@@ -118,21 +124,26 @@ model Sale {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  commission Commission?
+
   @@index([memberId])
   @@index([saleDate])
   @@index([plotReference])
 }
 
 model Commission {
-  id             String   @id @default(uuid())
+  id             String         @id @default(uuid())
+  type           CommissionType @default(JOINING)
   memberId       String
-  member         Member   @relation("CommissionEarned", fields: [memberId], references: [id])
+  member         Member         @relation("CommissionEarned", fields: [memberId], references: [id])
   sourceMemberId String
-  sourceMember   Member   @relation("CommissionSource", fields: [sourceMemberId], references: [id])
-  bookingAmount  Decimal  @db.Decimal(14, 2)
-  percentage     Decimal  @db.Decimal(5, 2)
-  amount         Decimal  @db.Decimal(14, 2)
-  createdAt      DateTime @default(now())
+  sourceMember   Member         @relation("CommissionSource", fields: [sourceMemberId], references: [id])
+  saleId         String?        @unique
+  sale           Sale?          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  baseAmount     Decimal        @db.Decimal(14, 2)
+  percentage     Decimal        @db.Decimal(5, 2)
+  amount         Decimal        @db.Decimal(14, 2)
+  createdAt      DateTime       @default(now())
 
   @@index([memberId])
   @@index([sourceMemberId])

@@ -14,6 +14,7 @@ export interface Rank {
   id: string;
   name: string;
   sortOrder: number;
+  commissionPercentage: number;
 }
 
 export interface Member {
@@ -63,9 +64,10 @@ export interface SponsorOption {
 
 export interface Commission {
   id: string;
+  type: "JOINING" | "SALE";
   member?: { id: string; name: string; memberCode: string };
   sourceMember: { id: string; name: string; memberCode: string };
-  bookingAmount: string;
+  baseAmount: string;
   percentage: string;
   amount: string;
   createdAt: string;

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import Card from "../../components/ui/Card";
@@ -89,6 +90,9 @@ export default function EditMember() {
 
   const update = (field: keyof MemberFormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
+    if (field === "rankId" || field === "sponsorMemberId") {
+      setErrors((prev) => ({ ...prev, rankId: undefined }));
+    }
   };
 
   const fetchSponsors = async (query: string): Promise<DropdownOption[]> => {
@@ -129,7 +133,15 @@ export default function EditMember() {
       toast("Member updated successfully.", "success");
       navigate(`/admin/members/${id}`);
     } catch (err) {
-      toast("Failed to update member. Please check the details and try again.", "error");
+      const response = axios.isAxiosError<{ message?: string; code?: string }>(err)
+        ? err.response?.data
+        : undefined;
+      if (response?.code === "RANK_HIERARCHY") {
+        setErrors((prev) => ({ ...prev, rankId: response.message }));
+        return;
+      }
+      const message = response?.message;
+      toast(message ?? "Failed to update member. Please check the details and try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -231,7 +243,7 @@ export default function EditMember() {
                   <option value="">Select rank</option>
                   {ranks.map((r) => (
                     <option key={r.id} value={r.id}>
-                      {r.name}
+                      {r.name} ({r.commissionPercentage}%)
                     </option>
                   ))}
                 </select>

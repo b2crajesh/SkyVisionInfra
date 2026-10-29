@@ -6,7 +6,7 @@ import { serializeMember } from "../services/memberSerializer";
 import { generateNextMemberCode } from "../services/memberIdGenerator";
 import { generateTempPassword } from "../utils/password";
 import { hashPassword } from "../utils/hash";
-import { calculateCommissionAmount, COMMISSION_PERCENTAGE } from "../services/commission";
+import { calculateCommissionAmount } from "../services/commission";
 import { sendMemberCredentialsWhatsApp } from "../services/whatsapp";
 import { sendMemberCredentialsEmail } from "../services/memberCredentialsEmail";
 import { CreateMemberInput, UpdateMemberInput } from "../validators/member.validators";
@@ -122,8 +122,13 @@ export async function createMember(
   try {
     const input = req.body;
 
+    const sponsor = input.sponsorMemberId
+      ? await prisma.member.findUnique({
+          where: { id: input.sponsorMemberId },
+          include: { rank: true },
+        })
+      : null;
     if (input.sponsorMemberId) {
-      const sponsor = await prisma.member.findUnique({ where: { id: input.sponsorMemberId } });
       if (!sponsor || sponsor.status !== "ACTIVE") {
         throw new ApiError(400, "sponsorMemberId must reference an existing active member");
       }
@@ -132,6 +137,13 @@ export async function createMember(
     const rank = await prisma.rank.findUnique({ where: { id: input.rankId } });
     if (!rank) {
       throw new ApiError(400, "rankId does not reference an existing rank");
+    }
+    if (sponsor && rank.commissionPercentage > sponsor.rank.commissionPercentage) {
+      throw new ApiError(
+        400,
+        "A member's rank cannot be higher than their sponsor's rank",
+        "RANK_HIERARCHY"
+      );
     }
 
     const tempPassword = generateTempPassword();
@@ -170,14 +182,15 @@ export async function createMember(
         include: memberInclude,
       });
 
-      if (input.sponsorMemberId) {
+      if (sponsor) {
         await tx.commission.create({
           data: {
-            memberId: input.sponsorMemberId,
+            type: "JOINING",
+            memberId: sponsor.id,
             sourceMemberId: member.id,
-            bookingAmount: input.bookingAmount,
-            percentage: COMMISSION_PERCENTAGE,
-            amount: calculateCommissionAmount(input.bookingAmount),
+            baseAmount: input.bookingAmount,
+            percentage: sponsor.rank.commissionPercentage,
+            amount: calculateCommissionAmount(input.bookingAmount, sponsor.rank.commissionPercentage),
           },
         });
       }
@@ -217,26 +230,43 @@ export async function updateMember(
     const { id } = req.params;
     const input = req.body;
 
-    const existing = await prisma.member.findUnique({ where: { id } });
+    const existing = await prisma.member.findUnique({ where: { id }, include: { rank: true } });
     if (!existing) {
       throw new ApiError(404, "Member not found");
     }
 
-    if (input.sponsorMemberId) {
-      if (input.sponsorMemberId === id) {
+    const sponsorMemberId =
+      input.sponsorMemberId !== undefined ? input.sponsorMemberId : existing.sponsorMemberId;
+    let sponsorCommissionPercentage: number | null = null;
+    if (sponsorMemberId) {
+      if (input.sponsorMemberId && sponsorMemberId === id) {
         throw new ApiError(400, "A member cannot sponsor themselves");
       }
-      const sponsor = await prisma.member.findUnique({ where: { id: input.sponsorMemberId } });
-      if (!sponsor || sponsor.status !== "ACTIVE") {
+      const sponsor = await prisma.member.findUnique({
+        where: { id: sponsorMemberId },
+        include: { rank: true },
+      });
+      if (!sponsor || (input.sponsorMemberId && sponsor.status !== "ACTIVE")) {
         throw new ApiError(400, "sponsorMemberId must reference an existing active member");
       }
+      sponsorCommissionPercentage = sponsor.rank.commissionPercentage;
     }
 
-    if (input.rankId) {
-      const rank = await prisma.rank.findUnique({ where: { id: input.rankId } });
-      if (!rank) {
-        throw new ApiError(400, "rankId does not reference an existing rank");
-      }
+    const rank = input.rankId
+      ? await prisma.rank.findUnique({ where: { id: input.rankId } })
+      : existing.rank;
+    if (!rank) {
+      throw new ApiError(400, "rankId does not reference an existing rank");
+    }
+    if (
+      sponsorCommissionPercentage !== null &&
+      rank.commissionPercentage > sponsorCommissionPercentage
+    ) {
+      throw new ApiError(
+        400,
+        "A member's rank cannot be higher than their sponsor's rank",
+        "RANK_HIERARCHY"
+      );
     }
 
     const member = await prisma.member.update({
@@ -268,19 +298,39 @@ export async function deleteMember(req: Request, res: Response, next: NextFuncti
   try {
     const { id } = req.params;
 
-    const member = await prisma.member.findUnique({
-      where: { id },
-      include: { sales: true, sponsees: true },
-    });
-    if (!member) {
-      throw new ApiError(404, "Member not found");
-    }
-
-    if (member.sales.length > 0) {
-      throw new ApiError(400, "Cannot delete a member with recorded sales");
-    }
-
     await prisma.$transaction(async (tx) => {
+      const member = await tx.member.findUnique({
+        where: { id },
+        include: {
+          sales: true,
+          sponsees: true,
+          commissionsEarned: true,
+          commissionsSourced: true,
+        },
+      });
+      if (!member) {
+        throw new ApiError(404, "Member not found");
+      }
+
+      if (member.sales.length > 0) {
+        throw new ApiError(400, "Cannot delete a member with recorded sales");
+      }
+
+      const commissions = [
+        ...member.commissionsEarned,
+        ...member.commissionsSourced,
+      ];
+      if (commissions.some((commission) => commission.type !== "JOINING")) {
+        throw new ApiError(400, "Cannot delete a member with sale commissions");
+      }
+
+      await tx.commission.deleteMany({
+        where: {
+          type: "JOINING",
+          OR: [{ memberId: id }, { sourceMemberId: id }],
+        },
+      });
+
       if (member.sponsees.length > 0) {
         await tx.member.updateMany({
           where: { sponsorMemberId: id },

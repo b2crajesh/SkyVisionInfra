@@ -6,18 +6,20 @@ const memberSummarySelect = { id: true, name: true, memberCode: true } as const;
 
 function serializeCommission(c: {
   id: string;
+  type: "JOINING" | "SALE";
   member?: { id: string; name: string; memberCode: string };
   sourceMember: { id: string; name: string; memberCode: string };
-  bookingAmount: { toString(): string };
+  baseAmount: { toString(): string };
   percentage: { toString(): string };
   amount: { toString(): string };
   createdAt: Date;
 }) {
   return {
     id: c.id,
+    type: c.type,
     member: c.member,
     sourceMember: c.sourceMember,
-    bookingAmount: c.bookingAmount.toString(),
+    baseAmount: c.baseAmount.toString(),
     percentage: c.percentage.toString(),
     amount: c.amount.toString(),
     createdAt: c.createdAt.toISOString(),

@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { ApiError } from "../middleware/errorHandler";
 import { CreateSaleInput, UpdateSaleInput } from "../validators/sale.validators";
+import { calculateCommissionAmount } from "../services/commission";
 
 function serializeSale(sale: Prisma.SaleGetPayload<{ include: { member: true } }>) {
   return {
@@ -107,13 +108,16 @@ export async function createSale(
     }
     const input = req.body;
 
-    const member = await prisma.member.findUnique({ where: { id: input.memberId } });
-    if (!member) {
-      throw new ApiError(400, "memberId does not reference an existing member");
-    }
-
     const sale = await prisma.$transaction(async (tx) => {
-      return tx.sale.create({
+      const member = await tx.member.findUnique({
+        where: { id: input.memberId },
+        include: { sponsor: { include: { rank: true } } },
+      });
+      if (!member) {
+        throw new ApiError(400, "memberId does not reference an existing member");
+      }
+
+      const sale = await tx.sale.create({
         data: {
           memberId: input.memberId,
           plotReference: input.plotReference,
@@ -125,6 +129,23 @@ export async function createSale(
         },
         include: { member: true },
       });
+
+      if (member.sponsor) {
+        const percentage = member.sponsor.rank.commissionPercentage;
+        await tx.commission.create({
+          data: {
+            type: "SALE",
+            memberId: member.sponsor.id,
+            sourceMemberId: member.id,
+            saleId: sale.id,
+            baseAmount: sale.amount,
+            percentage,
+            amount: calculateCommissionAmount(sale.amount, percentage),
+          },
+        });
+      }
+
+      return sale;
     });
 
     res.status(201).json({ sale: serializeSale(sale) });
@@ -140,27 +161,50 @@ export async function updateSale(
 ): Promise<void> {
   try {
     const input = req.body;
-    const member = await prisma.member.findUnique({ where: { id: input.memberId } });
-    if (!member) {
-      throw new ApiError(400, "memberId does not reference an existing member");
-    }
+    const sale = await prisma.$transaction(async (tx) => {
+      const member = await tx.member.findUnique({
+        where: { id: input.memberId },
+        include: { sponsor: { include: { rank: true } } },
+      });
+      if (!member) {
+        throw new ApiError(400, "memberId does not reference an existing member");
+      }
 
-    const existingSale = await prisma.sale.findUnique({ where: { id: req.params.id } });
-    if (!existingSale) {
-      throw new ApiError(404, "Sale not found");
-    }
+      const existingSale = await tx.sale.findUnique({ where: { id: req.params.id } });
+      if (!existingSale) {
+        throw new ApiError(404, "Sale not found");
+      }
 
-    const sale = await prisma.sale.update({
-      where: { id: req.params.id },
-      data: {
-        memberId: input.memberId,
-        plotReference: input.plotReference,
-        area: input.area,
-        rate: input.rate,
-        amount: new Prisma.Decimal(input.area).mul(input.rate).toDecimalPlaces(2),
-        saleDate: new Date(input.saleDate),
-      },
-      include: { member: true },
+      const sale = await tx.sale.update({
+        where: { id: req.params.id },
+        data: {
+          memberId: input.memberId,
+          plotReference: input.plotReference,
+          area: input.area,
+          rate: input.rate,
+          amount: new Prisma.Decimal(input.area).mul(input.rate).toDecimalPlaces(2),
+          saleDate: new Date(input.saleDate),
+        },
+        include: { member: true },
+      });
+
+      await tx.commission.deleteMany({ where: { saleId: sale.id } });
+      if (member.sponsor) {
+        const percentage = member.sponsor.rank.commissionPercentage;
+        await tx.commission.create({
+          data: {
+            type: "SALE",
+            memberId: member.sponsor.id,
+            sourceMemberId: member.id,
+            saleId: sale.id,
+            baseAmount: sale.amount,
+            percentage,
+            amount: calculateCommissionAmount(sale.amount, percentage),
+          },
+        });
+      }
+
+      return sale;
     });
 
     res.json({ sale: serializeSale(sale) });
@@ -175,7 +219,10 @@ export async function deleteSale(
   next: NextFunction
 ): Promise<void> {
   try {
-    const result = await prisma.sale.deleteMany({ where: { id: req.params.id } });
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.commission.deleteMany({ where: { saleId: req.params.id } });
+      return tx.sale.deleteMany({ where: { id: req.params.id } });
+    });
     if (result.count === 0) {
       throw new ApiError(404, "Sale not found");
     }

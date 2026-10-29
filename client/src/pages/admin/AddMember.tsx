@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import axios from "axios";
 import DashboardLayout from "../../components/DashboardLayout";
 import Card from "../../components/ui/Card";
 import FormField from "../../components/FormField";
@@ -62,6 +63,9 @@ export default function AddMember() {
 
   const update = (field: keyof MemberFormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
+    if (field === "rankId" || field === "sponsorMemberId") {
+      setErrors((prev) => ({ ...prev, rankId: undefined }));
+    }
   };
 
   const fetchSponsors = async (query: string): Promise<DropdownOption[]> => {
@@ -108,7 +112,15 @@ export default function AddMember() {
         delivery: data.delivery,
       });
     } catch (err) {
-      toast("Failed to create member. Please check the details and try again.", "error");
+      const response = axios.isAxiosError<{ message?: string; code?: string }>(err)
+        ? err.response?.data
+        : undefined;
+      if (response?.code === "RANK_HIERARCHY") {
+        setErrors((prev) => ({ ...prev, rankId: response.message }));
+        return;
+      }
+      const message = response?.message;
+      toast(message ?? "Failed to create member. Please check the details and try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -214,7 +226,7 @@ export default function AddMember() {
                 <option value="">Select rank</option>
                 {ranks.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.name}
+                    {r.name} ({r.commissionPercentage}%)
                   </option>
                 ))}
               </select>

@@ -22,13 +22,18 @@ const saleColumns: Column<Sale>[] = [
 const commissionColumns: Column<Commission>[] = [
   {
     key: "sourceMember",
-    header: "New Member",
+    header: "Source Member",
     render: (c) => `${c.sourceMember.name} (${c.sourceMember.memberCode})`,
   },
   {
-    key: "bookingAmount",
-    header: "Booking Amount",
-    render: (c) => Number(c.bookingAmount).toLocaleString("en-IN"),
+    key: "type",
+    header: "Commission Type",
+    render: (c) => (c.type === "JOINING" ? "Joining" : "Sale"),
+  },
+  {
+    key: "baseAmount",
+    header: "Commission Base Amount",
+    render: (c) => Number(c.baseAmount).toLocaleString("en-IN"),
   },
   { key: "percentage", header: "Commission %", render: (c) => `${c.percentage}%` },
   {

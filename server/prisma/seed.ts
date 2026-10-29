@@ -15,11 +15,12 @@ const prisma = new PrismaClient({
 });
 
 const RANKS = [
-  { name: "Junior Executive", sortOrder: 1 },
-  { name: "Executive", sortOrder: 2 },
-  { name: "Senior Executive", sortOrder: 3 },
-  { name: "Manager", sortOrder: 4 },
-  { name: "Senior Manager", sortOrder: 5 },
+  { name: "Junior Executive", sortOrder: 1, commissionPercentage: 5 },
+  { name: "Executive", sortOrder: 2, commissionPercentage: 6 },
+  { name: "Senior Executive", sortOrder: 3, commissionPercentage: 7 },
+  { name: "Manager", sortOrder: 4, commissionPercentage: 8 },
+  { name: "Senior Manager", sortOrder: 5, commissionPercentage: 9 },
+  { name: "Ambassador", sortOrder: 6, commissionPercentage: 10 },
 ];
 
 const ADMIN_USER_ID = "admin";
@@ -35,8 +36,12 @@ async function main() {
   for (const r of RANKS) {
     const rank = await prisma.rank.upsert({
       where: { name: r.name },
-      create: { name: r.name, sortOrder: r.sortOrder },
-      update: { sortOrder: r.sortOrder },
+      create: {
+        name: r.name,
+        sortOrder: r.sortOrder,
+        commissionPercentage: r.commissionPercentage,
+      },
+      update: { sortOrder: r.sortOrder, commissionPercentage: r.commissionPercentage },
     });
     rankRecords[r.name] = rank.id;
   }

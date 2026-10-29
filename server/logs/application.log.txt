@@ -1,0 +1,2 @@
+C:\Users\apkar\SkyVisionInfra\SkyVisionInfra-1\server\logs\20261027-0010-01-application.log
+C:\Users\apkar\SkyVisionInfra\SkyVisionInfra-1\server\logs\20261028-0302-01-application.log
