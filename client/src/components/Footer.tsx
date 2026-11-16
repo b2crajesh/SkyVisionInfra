@@ -68,9 +68,9 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Visit Sky Vision Infra on Facebook"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1877F2] hover:bg-[#166FE5]"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-gold-light transition-colors hover:bg-gold-light hover:text-navy"
                 >
-                  <span aria-hidden="true" className="text-2xl font-bold leading-none text-white">
+                  <span aria-hidden="true" className="text-2xl font-bold leading-none">
                     f
                   </span>
                 </a>
