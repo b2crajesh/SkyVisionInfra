@@ -50,7 +50,7 @@ export default function HowItWorks() {
           {steps.map((s) => (
             <Reveal key={s.step}>
               <div className="flex gap-4">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-navy text-sm font-bold text-gold">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-navy text-sm font-bold text-gold-light">
                   {s.step}
                 </div>
                 <div>

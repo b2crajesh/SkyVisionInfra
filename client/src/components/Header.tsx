@@ -30,9 +30,9 @@ export default function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" aria-label="Sky Vision Infra home" className="flex shrink-0 items-center">
           <img
-            src="/logo-horizontal-transparent.png"
+            src="/sky-vision-logo.png"
             alt="Sky Vision Infra"
-            className="h-12 w-auto rounded-md bg-navy px-2 py-1"
+            className="h-16 w-16 rounded-md object-cover"
           />
         </Link>
 

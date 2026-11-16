@@ -9,9 +9,9 @@ export default function Footer() {
         <div>
           <div className="mb-3">
             <img
-              src="/logo-horizontal-transparent.png"
+              src="/sky-vision-logo.png"
               alt="Sky Vision Infra"
-              className="h-12 w-auto"
+              className="h-16 w-16 rounded-md object-cover"
             />
           </div>
           <p className="text-sm text-white/70">
@@ -21,7 +21,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold">
+          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold-light">
             Quick Links
           </h4>
           <ul className="space-y-2 text-sm text-white/70">
@@ -35,7 +35,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold">
+          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold-light">
             Contact
           </h4>
           <ul className="space-y-2 text-sm text-white/70">
@@ -49,7 +49,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold">
+          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold-light">
             Legal
           </h4>
           <ul className="space-y-2 text-sm text-white/70">
@@ -58,14 +58,28 @@ export default function Footer() {
             <li><Link to="/disclaimer" className="hover:text-white">Disclaimer</Link></li>
           </ul>
           <div className="mt-4 flex gap-3">
-            {["FB", "IG", "LI", "YT"].map((s) => (
-              <span
-                key={s}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs"
-              >
-                {s}
-              </span>
-            ))}
+            {["FB", "IG", "LI", "YT"].map((s) => {
+              const className =
+                "flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs";
+              return s === "FB" ? (
+                <a
+                  key={s}
+                  href="https://www.facebook.com/profile.php?id=61596701608371"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit Sky Vision Infra on Facebook"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1877F2] hover:bg-[#166FE5]"
+                >
+                  <span aria-hidden="true" className="text-2xl font-bold leading-none text-white">
+                    f
+                  </span>
+                </a>
+              ) : (
+                <span key={s} className={className}>
+                  {s}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>

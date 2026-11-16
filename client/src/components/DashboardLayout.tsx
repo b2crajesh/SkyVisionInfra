@@ -51,9 +51,9 @@ export default function DashboardLayout({
       <aside className="hidden w-64 flex-col bg-navy text-white md:flex">
         <div className="flex flex-col items-start gap-2 border-b border-white/10 px-6 py-5">
           <img
-            src="/logo-horizontal-transparent.png"
+            src="/sky-vision-logo.png"
             alt="Sky Vision Infra"
-            className="h-9 w-auto"
+            className="h-12 w-12 rounded-md object-cover"
           />
           <span className="text-sm font-bold">{title}</span>
         </div>
@@ -73,9 +73,9 @@ export default function DashboardLayout({
             <div className="flex items-center justify-between gap-2 border-b border-white/10 px-6 py-5">
               <div className="flex flex-col items-start gap-2">
                 <img
-                  src="/logo-horizontal-transparent.png"
+                  src="/sky-vision-logo.png"
                   alt="Sky Vision Infra"
-                  className="h-9 w-auto"
+                  className="h-12 w-12 rounded-md object-cover"
                 />
                 <span className="text-sm font-bold">{title}</span>
               </div>

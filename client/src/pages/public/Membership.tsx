@@ -27,7 +27,12 @@ const tiers = [
   {
     name: "Senior Manager",
     description:
-      "Our highest recognition tier, reserved for members with exceptional, sustained contribution to the network's growth.",
+      "A senior recognition tier for members with exceptional, sustained contribution to the network's growth.",
+  },
+  {
+    name: "Ambassador",
+    description:
+      "The highest membership rank, recognising exceptional leadership and sustained contribution to the network.",
   },
 ];
 
@@ -43,7 +48,7 @@ export default function Membership() {
           />
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {tiers.map((t) => (
             <Reveal key={t.name}>
               <Card className="h-full text-center">

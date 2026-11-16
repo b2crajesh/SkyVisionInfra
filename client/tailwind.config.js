@@ -4,17 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        navy: "#4338CA",
-        gold: "#06B6D4",
-        charcoal: "#1E293B",
-        lightbg: "#F8FAFC",
+        navy: "#171717",
+        gold: "#8B6B2E",
+        "gold-light": "#D8B867",
+        charcoal: "#2E2B27",
+        lightbg: "#F8F6F1",
         saffron: "#F59E0B",
         indiaGreen: "#10B981",
       },
       boxShadow: {
-        soft: "0 2px 8px rgba(15, 23, 42, 0.06)",
-        card: "0 4px 16px rgba(15, 23, 42, 0.08)",
-        lifted: "0 12px 32px rgba(67, 56, 202, 0.15)",
+        soft: "0 2px 8px rgba(23, 23, 23, 0.06)",
+        card: "0 4px 16px rgba(23, 23, 23, 0.08)",
+        lifted: "0 12px 32px rgba(139, 107, 46, 0.15)",
       },
       keyframes: {
         fadeSlideUp: {

@@ -26,7 +26,7 @@ const services = [
     icon: "🎖️",
     title: "Membership Program",
     description:
-      "A tiered membership structure - Junior Executive through Senior Manager - that recognises engagement, participation, and contribution to the network.",
+      "A tiered membership structure - Junior Executive through Ambassador - that recognises engagement, participation, and contribution to the network.",
   },
   {
     icon: "🔗",

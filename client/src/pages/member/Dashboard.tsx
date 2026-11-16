@@ -38,7 +38,7 @@ function NetworkNodeCard({
       <div className="flex items-center gap-3 p-4">
         <div
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-            isCurrent ? "bg-gold text-navy" : "bg-navy/10 text-navy"
+            isCurrent ? "bg-gold text-white" : "bg-navy/10 text-navy"
           }`}
         >
           {initials}

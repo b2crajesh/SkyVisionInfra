@@ -66,19 +66,19 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-6 text-white/90 sm:grid-cols-3">
             <Reveal>
               <div>
-                <p className="mb-2 text-3xl font-bold text-gold">10+</p>
+                <p className="mb-2 text-3xl font-bold text-gold-light">10+</p>
                 <p className="text-sm">Years of combined leadership experience in land and infrastructure.</p>
               </div>
             </Reveal>
             <Reveal>
               <div>
-                <p className="mb-2 text-3xl font-bold text-gold">100%</p>
+                <p className="mb-2 text-3xl font-bold text-gold-light">100%</p>
                 <p className="text-sm">Documented member records with masked, secure identity data.</p>
               </div>
             </Reveal>
             <Reveal>
               <div>
-                <p className="mb-2 text-3xl font-bold text-gold">Clear</p>
+                <p className="mb-2 text-3xl font-bold text-gold-light">Clear</p>
                 <p className="text-sm">Disclosed compensation terms with no guaranteed-income claims.</p>
               </div>
             </Reveal>

@@ -32,7 +32,7 @@ const faqs = [
   {
     question: "How do membership ranks work?",
     answer:
-      "Ranks - Junior Executive, Executive, Senior Executive, Manager, and Senior Manager - reflect a member's sustained engagement and qualifying activity over time, as reviewed by our administrative team.",
+      "Ranks - Junior Executive, Executive, Senior Executive, Manager, Senior Manager, and Ambassador - reflect a member's sustained engagement and qualifying activity over time, as reviewed by our administrative team. Ambassador is the highest membership rank.",
   },
   {
     question: "How is my personal information protected?",
