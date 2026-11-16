@@ -14,7 +14,7 @@ export default function Footer() {
               className="h-16 w-16 rounded-md object-cover"
             />
           </div>
-          <p className="text-sm text-white/70">
+          <p className="text-sm text-white">
             Building lasting value through land, property development, and a
             transparent, member-driven referral network.
           </p>
@@ -24,7 +24,7 @@ export default function Footer() {
           <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold-light">
             Quick Links
           </h4>
-          <ul className="space-y-2 text-sm text-white/70">
+          <ul className="space-y-2 text-sm text-white">
             <li><Link to="/about" className="hover:text-white">About Us</Link></li>
             <li><Link to="/services" className="hover:text-white">Services</Link></li>
             <li><Link to="/membership" className="hover:text-white">Membership</Link></li>
@@ -38,7 +38,7 @@ export default function Footer() {
           <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold-light">
             Contact
           </h4>
-          <ul className="space-y-2 text-sm text-white/70">
+          <ul className="space-y-2 text-sm text-white">
             <li>Sky Vision Infra and Developers Pvt Ltd</li>
             <li>Pd mall, Padrauna, Kushinagar</li>
             <li><a href="tel:9838156555" className="hover:text-white">9838156555</a></li>
@@ -52,7 +52,7 @@ export default function Footer() {
           <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gold-light">
             Legal
           </h4>
-          <ul className="space-y-2 text-sm text-white/70">
+          <ul className="space-y-2 text-sm text-white">
             <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
             <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
             <li><Link to="/disclaimer" className="hover:text-white">Disclaimer</Link></li>
@@ -84,7 +84,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/10 py-4 text-center text-xs text-white/60">
+      <div className="border-t border-white/10 py-4 text-center text-xs text-white">
         &copy; {year} Sky Vision Infra & Developers. All rights reserved.
       </div>
     </footer>

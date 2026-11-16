@@ -58,6 +58,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Reveal>
             <SectionHeading
+              onDark
               eyebrow="Why Sky Vision"
               title="Built on Trust, Governance, and Long-Term Thinking"
               subtitle="We hold ourselves to disciplined documentation, transparent member records, and a compensation structure that is disclosed in full, not hidden in fine print."
