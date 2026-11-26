@@ -30,32 +30,26 @@ function NetworkNodeCard({
   return (
     <div
       tabIndex={0}
-      className={`group w-full max-w-sm overflow-hidden rounded-xl border bg-white shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold xl:w-56 ${
-        isCurrent ? "border-gold ring-2 ring-gold/20" : "border-slate-200"
+      title={`${node.name} (${node.memberCode}) - ${node.rank}`}
+      className={`group relative flex h-36 w-36 shrink-0 flex-col items-center justify-center gap-1 rounded-full border-2 bg-white p-3 text-center shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+        isCurrent ? "border-gold bg-gold/5 ring-2 ring-gold/20" : "border-slate-200"
       }`}
     >
-      <div className={`h-1 ${isCurrent ? "bg-gold" : "bg-navy/70"}`} />
-      <div className="flex items-center gap-3 p-4">
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-            isCurrent ? "bg-gold text-white" : "bg-navy/10 text-navy"
-          }`}
-        >
-          {initials}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="truncate font-semibold text-navy">{node.name}</p>
-            {isCurrent && <span className="shrink-0 text-xs font-bold text-gold">YOU</span>}
-          </div>
-          <p className="h-4 truncate text-xs text-charcoal/60 opacity-100 transition-opacity xl:invisible xl:opacity-0 xl:group-hover:visible xl:group-hover:opacity-100 xl:group-focus-within:visible xl:group-focus-within:opacity-100">
-            {node.memberCode}
-          </p>
-        </div>
+      {isCurrent && (
+        <span className="absolute right-5 top-4 rounded-full bg-gold px-2 py-0.5 text-[9px] font-bold text-white">
+          YOU
+        </span>
+      )}
+      <div
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+          isCurrent ? "bg-gold text-white" : "bg-navy/10 text-navy"
+        }`}
+      >
+        {initials}
       </div>
-      <div className="border-t border-slate-100 px-4 py-2">
-        <span className="truncate text-xs font-medium text-charcoal/70">{node.rank}</span>
-      </div>
+      <p className="line-clamp-2 w-full text-xs font-semibold leading-tight text-navy">{node.name}</p>
+      <p className="max-w-full truncate text-[10px] leading-none text-charcoal/60">{node.memberCode}</p>
+      <p className="line-clamp-2 w-full text-[10px] font-medium leading-tight text-charcoal/80">{node.rank}</p>
     </div>
   );
 }
@@ -67,23 +61,45 @@ function NetworkBranch({
   node: MemberNetworkNode;
   isCurrent?: boolean;
 }) {
+  const [childrenExpanded, setChildrenExpanded] = useState(false);
+
   return (
     <div className="flex w-full flex-col items-center xl:w-auto">
       <NetworkNodeCard node={node} isCurrent={isCurrent} />
       {node.sponsoredMembers.length > 0 && (
         <>
-          <div className="hidden h-7 w-px bg-slate-300 xl:block" />
-          <ul className="relative mt-4 flex w-full flex-col gap-3 border-l border-slate-300 pl-4 xl:mt-0 xl:w-auto xl:flex-row xl:items-start xl:justify-center xl:gap-6 xl:border-l-0 xl:pl-0 xl:before:absolute xl:before:left-[7rem] xl:before:right-[7rem] xl:before:top-0 xl:before:h-px xl:before:bg-slate-300">
-            {node.sponsoredMembers.map((sponsoredMember) => (
-              <li
-                key={sponsoredMember.id}
-                className="relative flex w-full flex-col items-center before:absolute before:left-[-1rem] before:top-6 before:h-px before:w-3 before:bg-slate-300 xl:w-auto xl:shrink-0 xl:before:left-0 xl:before:top-0 xl:before:h-7 xl:before:w-px"
-              >
-                <div className="hidden h-7 xl:block" />
-                <NetworkBranch node={sponsoredMember} />
-              </li>
-            ))}
-          </ul>
+          <button
+            type="button"
+            aria-expanded={childrenExpanded}
+            aria-controls={`network-children-${node.id}`}
+            aria-label={`${childrenExpanded ? "Collapse" : "Expand"} ${node.sponsoredMembers.length} members sponsored by ${node.name}`}
+            onClick={() => setChildrenExpanded((expanded) => !expanded)}
+            className="relative z-10 my-1 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-navy shadow-soft transition-colors hover:border-gold hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          >
+            <span aria-hidden="true">{childrenExpanded ? "-" : "+"}</span>
+            {childrenExpanded ? "Collapse" : "Expand"} {node.sponsoredMembers.length}
+          </button>
+          <div
+            className={`flex w-full flex-col items-center xl:w-auto ${
+              childrenExpanded ? "" : "hidden"
+            }`}
+          >
+            <div className="hidden h-7 w-px bg-slate-300 xl:block" />
+            <ul
+              id={`network-children-${node.id}`}
+              className="relative mt-4 flex w-full flex-col gap-3 border-l border-slate-300 pl-4 xl:mt-0 xl:w-auto xl:flex-row xl:items-start xl:justify-center xl:gap-6 xl:border-l-0 xl:pl-0 xl:before:absolute xl:before:left-[4.5rem] xl:before:right-[4.5rem] xl:before:top-0 xl:before:h-px xl:before:bg-slate-300"
+            >
+              {node.sponsoredMembers.map((sponsoredMember) => (
+                <li
+                  key={sponsoredMember.id}
+                  className="relative flex w-full flex-col items-center before:absolute before:left-[-1rem] before:top-6 before:h-px before:w-3 before:bg-slate-300 xl:w-auto xl:shrink-0 xl:before:left-0 xl:before:top-0 xl:before:h-7 xl:before:w-px"
+                >
+                  <div className="hidden h-7 xl:block" />
+                  <NetworkBranch node={sponsoredMember} />
+                </li>
+              ))}
+            </ul>
+          </div>
         </>
       )}
     </div>
@@ -213,11 +229,14 @@ export default function MemberDashboard() {
             <p className="mb-5 text-sm text-charcoal/60">
               Your sponsors are shown above you, and the members you sponsored appear below.
             </p>
+            <p className="mb-3 text-xs text-charcoal/60">
+              Scroll within this panel to explore the full tree.
+            </p>
             {networkError && <p className="text-sm text-red-600">{networkError}</p>}
             {!network && !networkError && <p className="text-sm text-charcoal/60">Loading sponsor tree...</p>}
             {network && (
-              <div className="overflow-x-hidden rounded-xl bg-slate-50/70 p-3 sm:p-6 xl:overflow-x-auto">
-                <div className="mx-auto flex w-full flex-col items-center xl:min-w-max">
+              <div className="network-tree-viewport rounded-xl bg-slate-50/70 p-3 sm:p-6">
+                <div className="flex w-max min-w-full flex-col items-center">
                 {network.sponsorChain.map((sponsor) => (
                   <div key={sponsor.id} className="flex w-full flex-col items-center xl:w-auto">
                     <NetworkNodeCard node={sponsor} />
