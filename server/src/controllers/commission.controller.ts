@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { ApiError } from "../middleware/errorHandler";
 
@@ -32,6 +33,31 @@ function serializeCommission(c: {
   };
 }
 
+function getCommissionOrderBy(
+  sortBy: string | undefined,
+  sortOrder: string | undefined
+): Prisma.CommissionOrderByWithRelationInput {
+  const direction = sortOrder === "asc" ? "asc" : "desc";
+  switch (sortBy) {
+    case "type":
+      return { type: direction };
+    case "baseAmount":
+      return { baseAmount: direction };
+    case "percentage":
+      return { percentage: direction };
+    case "amount":
+      return { amount: direction };
+    case "tdsPercentage":
+      return { tdsPercentage: direction };
+    case "tdsAmount":
+      return { tdsAmount: direction };
+    case "netAmount":
+      return { netAmount: direction };
+    default:
+      return { createdAt: direction };
+  }
+}
+
 export async function getMyCommissions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user?.memberId) {
@@ -62,12 +88,25 @@ export async function getMyCommissions(req: Request, res: Response, next: NextFu
 
 export async function listCommissions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { memberId, page, pageSize } = req.query as Record<string, string | undefined>;
+    const { memberId, search, type, sortBy, sortOrder, page, pageSize } =
+      req.query as Record<string, string | undefined>;
 
-    const where = memberId ? { memberId } : {};
+    const where: Prisma.CommissionWhereInput = {};
+    if (memberId) where.memberId = memberId;
+    if (type === "JOINING" || type === "SALE") where.type = type;
+    if (search) {
+      where.OR = [
+        { member: { name: { contains: search, mode: "insensitive" } } },
+        { member: { memberCode: { contains: search, mode: "insensitive" } } },
+        { sourceMember: { name: { contains: search, mode: "insensitive" } } },
+        { sourceMember: { memberCode: { contains: search, mode: "insensitive" } } },
+      ];
+    }
+
     const take = Math.min(Number(pageSize) || 20, 100);
     const currentPage = Math.max(Number(page) || 1, 1);
     const skip = (currentPage - 1) * take;
+    const orderBy = getCommissionOrderBy(sortBy, sortOrder);
 
     const [commissions, total, totals] = await Promise.all([
       prisma.commission.findMany({
@@ -76,7 +115,7 @@ export async function listCommissions(req: Request, res: Response, next: NextFun
           member: { select: memberSummarySelect },
           sourceMember: { select: memberSummarySelect },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy,
         take,
         skip,
       }),
