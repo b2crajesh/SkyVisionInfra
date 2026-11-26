@@ -28,8 +28,8 @@ export default function FormField({
       {children ?? (
         <input
           id={fieldId}
-          className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy ${
-            error ? "border-red-500" : "border-gray-300"
+          className={`w-full rounded-xl border bg-white px-3 py-2.5 text-sm text-navy shadow-sm transition placeholder:text-charcoal/40 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20 ${
+            error ? "border-red-500" : "border-slate-200"
           }`}
           {...rest}
         />

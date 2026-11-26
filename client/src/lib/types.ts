@@ -63,6 +63,12 @@ export interface DashboardSummary {
   recentMembers: Member[];
   totalSalesCount: number;
   totalSalesAmount: string;
+  currentMonthActivity: {
+    month: string;
+    memberCount: number;
+    salesCount: number;
+    salesAmount: string;
+  };
 }
 
 export interface SponsorOption {

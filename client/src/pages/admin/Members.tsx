@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import DataTable, { type Column } from "../../components/DataTable";
+import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
 import { adminNavItems } from "./adminNav";
 import { api } from "../../lib/api";
 import type { Member } from "../../lib/types";
@@ -72,7 +74,7 @@ export default function Members() {
       key: "status",
       header: "Status",
       render: (m) => (
-        <Badge tone={m.status === "active" ? "success" : "neutral"}>
+        <Badge tone={m.status.toUpperCase() === "ACTIVE" ? "success" : "neutral"}>
           {m.status}
         </Badge>
       ),
@@ -83,66 +85,110 @@ export default function Members() {
 
   return (
     <DashboardLayout title="Admin Panel" navItems={adminNavItems}>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-navy">Members</h1>
-      </div>
-
-      <div className="mb-4 flex flex-wrap gap-3">
-        <input
-          className="w-full max-w-xs rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy"
-          placeholder="Search by name or code"
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-        />
-        <select
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy"
-          value={status}
-          onChange={(e) => {
-            setPage(1);
-            setStatus(e.target.value);
-          }}
-        >
-          <option value="">All Statuses</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-        </select>
-      </div>
-
-      <DataTable
-        columns={columns}
-        rows={items}
-        rowKey={(m) => m.id}
-        sortKey={sort}
-        sortDir={sortDir}
-        onSort={handleSort}
-        onRowClick={(m) => navigate(`/admin/members/${m.id}`)}
-        emptyMessage={loading ? "Loading members..." : "No members found."}
-      />
-
-      <div className="mt-4 flex items-center justify-between text-sm text-charcoal/60">
-        <span>
-          Page {page} of {totalPages} ({total} total)
-        </span>
-        <div className="flex gap-2">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-md border border-gray-300 px-3 py-1 disabled:opacity-40"
-          >
-            Previous
-          </button>
-          <button
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="rounded-md border border-gray-300 px-3 py-1 disabled:opacity-40"
-          >
-            Next
-          </button>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+            Member directory
+          </p>
+          <h1 className="text-2xl font-bold text-navy sm:text-3xl">Members</h1>
+          <p className="mt-1 text-sm text-charcoal/60">
+            Search, review, and manage member accounts.
+          </p>
         </div>
+        <Link
+          to="/admin/members/new"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-navy/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">+</span>
+          Add member
+        </Link>
       </div>
+
+      <Card className="mb-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-end">
+          <div>
+            <label htmlFor="member-search" className="mb-1.5 block text-xs font-semibold text-charcoal/70">
+              Search members
+            </label>
+            <input
+              id="member-search"
+              type="search"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-navy shadow-sm outline-none transition placeholder:text-charcoal/40 focus:border-gold focus:ring-2 focus:ring-gold/20"
+              placeholder="Search by name or member code"
+              value={search}
+              onChange={(e) => {
+                setPage(1);
+                setSearch(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="member-status" className="mb-1.5 block text-xs font-semibold text-charcoal/70">
+              Account status
+            </label>
+            <select
+              id="member-status"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-navy shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20"
+              value={status}
+              onChange={(e) => {
+                setPage(1);
+                setStatus(e.target.value);
+              }}
+            >
+              <option value="">All statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
+          <p className="text-sm font-medium text-navy">
+            {total.toLocaleString("en-IN")} {total === 1 ? "member" : "members"}
+          </p>
+          <p className="text-xs text-charcoal/55">
+            {loading ? "Updating results..." : "Click a row to view member details"}
+          </p>
+        </div>
+      </Card>
+
+      <Card className="!p-3 sm:!p-4">
+        <DataTable
+          columns={columns}
+          rows={items}
+          rowKey={(m) => m.id}
+          sortKey={sort}
+          sortDir={sortDir}
+          onSort={handleSort}
+          onRowClick={(m) => navigate(`/admin/members/${m.id}`)}
+          emptyMessage={loading ? "Loading members..." : "No members found."}
+        />
+        <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-sm text-charcoal/60">
+            Page {page} of {totalPages}
+            <span className="ml-1 text-xs">({total.toLocaleString("en-IN")} total)</span>
+          </span>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="px-4 py-2"
+            >
+              Previous
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="px-4 py-2"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </Card>
     </DashboardLayout>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import Card from "../../components/ui/Card";
 import FormField from "../../components/FormField";
@@ -149,151 +149,194 @@ export default function EditMember() {
 
   return (
     <DashboardLayout title="Admin Panel" navItems={adminNavItems}>
-      <h1 className="mb-6 text-2xl font-bold text-navy">Edit Member</h1>
+      <div className="mb-6">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
+          Members / Account
+        </p>
+        <h1 className="text-2xl font-bold text-navy sm:text-3xl">Edit Member</h1>
+        <p className="mt-1 text-sm text-charcoal/60">
+          Update contact, membership, and nominee details.
+        </p>
+      </div>
       {loading ? (
-        <p className="text-charcoal/60">Loading...</p>
+        <Card className="max-w-5xl">
+          <div className="animate-pulse space-y-4" aria-label="Loading member details">
+            <div className="h-5 w-48 rounded bg-slate-100" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="h-11 rounded-xl bg-slate-100" />
+              <div className="h-11 rounded-xl bg-slate-100" />
+              <div className="h-11 rounded-xl bg-slate-100" />
+              <div className="h-11 rounded-xl bg-slate-100" />
+            </div>
+          </div>
+        </Card>
       ) : (
-        <Card className="max-w-3xl">
+        <Card className="!overflow-hidden !p-0 sm:!p-0">
           <form onSubmit={handleSubmit} noValidate>
-            <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              <FormField
-                label="Full Name"
-                value={values.name}
-                error={errors.name}
-                onChange={(e) => update("name", e.target.value)}
-              />
-              <FormField
-                label="Date of Birth"
-                type="date"
-                value={values.dateOfBirth}
-                error={errors.dateOfBirth}
-                onChange={(e) => update("dateOfBirth", e.target.value)}
-              />
+            <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-8">
+              <h2 className="text-sm font-semibold text-navy">Member details</h2>
+              <p className="mt-1 text-xs text-charcoal/55">
+                Make changes carefully; updated details will be saved to this account.
+              </p>
             </div>
-            <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              <FormField
-                label="Phone Number"
-                value={values.phone}
-                error={errors.phone}
-                hint="10 digits, no spaces"
-                onChange={(e) => update("phone", e.target.value)}
-              />
-              <FormField
-                label="Email Address"
-                type="email"
-                value={values.email}
-                error={errors.email}
-                onChange={(e) => update("email", e.target.value)}
-              />
-            </div>
-            <FormField
-              label="Address"
-              value={values.address}
-              error={errors.address}
-              onChange={(e) => update("address", e.target.value)}
-            />
-            <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              <FormField
-                label="Aadhaar Number"
-                value={values.aadhaarNumber}
-                error={errors.aadhaarNumber}
-                hint="12 digits, no spaces"
-                onChange={(e) => update("aadhaarNumber", e.target.value)}
-              />
-              <FormField
-                label="PAN Number"
-                value={values.panNumber}
-                error={errors.panNumber}
-                hint="Format: ABCDE1234F"
-                onChange={(e) => update("panNumber", e.target.value.toUpperCase())}
-              />
-            </div>
+            <div className="grid gap-5 p-5 sm:p-8 xl:grid-cols-2">
+              <section className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5">
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold text-navy">Personal information</h3>
+                  <p className="mt-0.5 text-xs text-charcoal/55">Contact and identity details</p>
+                </div>
+                <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+                  <FormField
+                    label="Full Name"
+                    value={values.name}
+                    error={errors.name}
+                    onChange={(e) => update("name", e.target.value)}
+                  />
+                  <FormField
+                    label="Date of Birth"
+                    type="date"
+                    value={values.dateOfBirth}
+                    error={errors.dateOfBirth}
+                    onChange={(e) => update("dateOfBirth", e.target.value)}
+                  />
+                  <FormField
+                    label="Phone Number"
+                    value={values.phone}
+                    error={errors.phone}
+                    hint="10 digits, no spaces"
+                    onChange={(e) => update("phone", e.target.value)}
+                  />
+                  <FormField
+                    label="Email Address"
+                    type="email"
+                    value={values.email}
+                    error={errors.email}
+                    onChange={(e) => update("email", e.target.value)}
+                  />
+                  <div className="sm:col-span-2">
+                    <FormField
+                      label="Address"
+                      value={values.address}
+                      error={errors.address}
+                      onChange={(e) => update("address", e.target.value)}
+                    />
+                  </div>
+                  <FormField
+                    label="Aadhaar Number"
+                    value={values.aadhaarNumber}
+                    error={errors.aadhaarNumber}
+                    hint="12 digits, no spaces"
+                    onChange={(e) => update("aadhaarNumber", e.target.value)}
+                  />
+                  <FormField
+                    label="PAN Number"
+                    value={values.panNumber}
+                    error={errors.panNumber}
+                    hint="Format: ABCDE1234F"
+                    onChange={(e) => update("panNumber", e.target.value.toUpperCase())}
+                  />
+                </div>
+              </section>
 
-            <SearchableDropdown
-              label="Sponsor"
-              placeholder="Search sponsor by name or code"
-              fetchOptions={fetchSponsors}
-              value={sponsor}
-              onSelect={(opt) => {
-                setSponsor(opt);
-                update("sponsorMemberId", opt?.id ?? "");
-              }}
-              error={errors.sponsorMemberId}
-            />
+              <div className="space-y-5">
+                <section className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-navy">Membership setup</h3>
+                    <p className="mt-0.5 text-xs text-charcoal/55">Sponsor, rank, and booking amount</p>
+                  </div>
+                  <SearchableDropdown
+                    label="Sponsor"
+                    placeholder="Search sponsor by name or code"
+                    fetchOptions={fetchSponsors}
+                    value={sponsor}
+                    onSelect={(opt) => {
+                      setSponsor(opt);
+                      update("sponsorMemberId", opt?.id ?? "");
+                    }}
+                    error={errors.sponsorMemberId}
+                  />
+                  <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+                    <FormField
+                      label="Booking Amount"
+                      type="number"
+                      value={values.bookingAmount}
+                      error={errors.bookingAmount}
+                      onChange={(e) => update("bookingAmount", e.target.value)}
+                    />
+                    <div className="mb-4">
+                      <label htmlFor="edit-member-rank" className="mb-1 block text-sm font-medium text-charcoal">
+                        Rank
+                      </label>
+                      <select
+                        id="edit-member-rank"
+                        className={`w-full rounded-xl border bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20 ${
+                          errors.rankId ? "border-red-500" : "border-slate-200"
+                        }`}
+                        value={values.rankId}
+                        onChange={(e) => update("rankId", e.target.value)}
+                      >
+                        <option value="">Select rank</option>
+                        {ranks.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.name} ({r.commissionPercentage}%)
+                          </option>
+                        ))}
+                      </select>
+                      {errors.rankId && (
+                        <p className="mt-1 text-xs text-red-600">{errors.rankId}</p>
+                      )}
+                    </div>
+                  </div>
+                </section>
 
-            <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              <FormField
-                label="Booking Amount"
-                type="number"
-                value={values.bookingAmount}
-                error={errors.bookingAmount}
-                onChange={(e) => update("bookingAmount", e.target.value)}
-              />
-              <div className="mb-4">
-                <label className="mb-1 block text-sm font-medium text-charcoal">
-                  Rank
-                </label>
-                <select
-                  className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy ${
-                    errors.rankId ? "border-red-500" : "border-gray-300"
-                  }`}
-                  value={values.rankId}
-                  onChange={(e) => update("rankId", e.target.value)}
-                >
-                  <option value="">Select rank</option>
-                  {ranks.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name} ({r.commissionPercentage}%)
-                    </option>
-                  ))}
-                </select>
-                {errors.rankId && (
-                  <p className="mt-1 text-xs text-red-600">{errors.rankId}</p>
-                )}
+                <section className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-navy">Nominee information</h3>
+                    <p className="mt-0.5 text-xs text-charcoal/55">Nominated contact details</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+                    <FormField
+                      label="Nominee Name"
+                      value={values.nomineeName}
+                      error={errors.nomineeName}
+                      onChange={(e) => update("nomineeName", e.target.value)}
+                    />
+                    <div className="mb-4">
+                      <label htmlFor="edit-nominee-relationship" className="mb-1 block text-sm font-medium text-charcoal">
+                        Relationship with Nominee
+                      </label>
+                      <select
+                        id="edit-nominee-relationship"
+                        className={`w-full rounded-xl border bg-white px-3 py-2.5 text-sm text-navy shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20 ${
+                          errors.relationship ? "border-red-500" : "border-slate-200"
+                        }`}
+                        value={values.relationship}
+                        onChange={(e) => update("relationship", e.target.value)}
+                      >
+                        <option value="">Select relationship</option>
+                        {RELATIONSHIP_OPTIONS.map((r) => (
+                          <option key={r} value={r}>
+                            {r.charAt(0) + r.slice(1).toLowerCase()}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.relationship && (
+                        <p className="mt-1 text-xs text-red-600">{errors.relationship}</p>
+                      )}
+                    </div>
+                  </div>
+                </section>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              <FormField
-                label="Nominee Name"
-                value={values.nomineeName}
-                error={errors.nomineeName}
-                onChange={(e) => update("nomineeName", e.target.value)}
-              />
-              <div className="mb-4">
-                <label className="mb-1 block text-sm font-medium text-charcoal">
-                  Relationship with Nominee
-                </label>
-                <select
-                  className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy ${
-                    errors.relationship ? "border-red-500" : "border-gray-300"
-                  }`}
-                  value={values.relationship}
-                  onChange={(e) => update("relationship", e.target.value)}
-                >
-                  <option value="">Select relationship</option>
-                  {RELATIONSHIP_OPTIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r.charAt(0) + r.slice(1).toLowerCase()}
-                    </option>
-                  ))}
-                </select>
-                {errors.relationship && (
-                  <p className="mt-1 text-xs text-red-600">{errors.relationship}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button type="submit" disabled={submitting}>
-                {submitting ? "Saving..." : "Save Changes"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(`/admin/members/${id}`)}
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <Link
+                to={`/admin/members/${id}`}
+                className="text-center text-sm font-medium text-charcoal/65 transition hover:text-navy sm:text-left"
               >
-                Cancel
+                Cancel and return to member
+              </Link>
+              <Button type="submit" disabled={submitting} className="min-w-40">
+                {submitting ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
