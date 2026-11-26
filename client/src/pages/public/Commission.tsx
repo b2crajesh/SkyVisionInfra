@@ -5,6 +5,11 @@ import Reveal from "../../components/Reveal";
 
 const tiers = [
   {
+    name: "Joining Commission",
+    detail:
+      "When a new member joins through a sponsor, 20% of the member's booking amount is payable as the joining commission.",
+  },
+  {
     name: "Direct Sale Commission",
     detail:
       "Applicable when a member's directly sponsored referral completes a qualifying plot booking.",

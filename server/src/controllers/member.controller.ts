@@ -6,7 +6,11 @@ import { serializeMember } from "../services/memberSerializer";
 import { generateNextMemberCode } from "../services/memberIdGenerator";
 import { generateTempPassword } from "../utils/password";
 import { hashPassword } from "../utils/hash";
-import { calculateCommissionAmount, calculateCommissionBreakdown } from "../services/commission";
+import {
+  calculateCommissionAmount,
+  calculateCommissionBreakdown,
+  JOINING_COMMISSION_PERCENTAGE,
+} from "../services/commission";
 import { sendMemberCredentialsWhatsApp } from "../services/whatsapp";
 import { sendMemberCredentialsEmail } from "../services/memberCredentialsEmail";
 import { CreateMemberInput, UpdateMemberInput } from "../validators/member.validators";
@@ -275,9 +279,9 @@ export async function createMember(
             memberId: sponsor.id,
             sourceMemberId: member.id,
             baseAmount: input.bookingAmount,
-            percentage: sponsor.rank.commissionPercentage,
+            percentage: JOINING_COMMISSION_PERCENTAGE,
             ...calculateCommissionBreakdown(
-              calculateCommissionAmount(input.bookingAmount, sponsor.rank.commissionPercentage)
+              calculateCommissionAmount(input.bookingAmount, JOINING_COMMISSION_PERCENTAGE)
             ),
           },
         });

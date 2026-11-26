@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
 
+export const JOINING_COMMISSION_PERCENTAGE = 20;
+
 export function calculateCommissionAmount(
   bookingAmount: Prisma.Decimal | number,
   percentage: number
