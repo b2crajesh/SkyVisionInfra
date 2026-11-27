@@ -51,7 +51,7 @@ const saleColumns: Column<Sale>[] = [
 const commissionColumns: Column<Commission>[] = [
   {
     key: "sourceMember",
-    header: "Source Member",
+    header: "Source Associate",
     render: (c) => `${c.sourceMember.name} (${c.sourceMember.memberCode})`,
   },
   {
@@ -111,7 +111,7 @@ export default function MemberDetail() {
     api
       .get<{ member: Member }>(`/members/${id}`)
       .then(({ data }) => setMember(data.member))
-      .catch(() => setError("Unable to load member details."))
+      .catch(() => setError("Unable to load associate details."))
       .finally(() => setLoading(false));
   };
 
@@ -145,7 +145,7 @@ export default function MemberDetail() {
       navigate("/admin/members");
     } catch (err: any) {
       setDeleteError(
-        err?.response?.data?.message ?? "Failed to delete member."
+        err?.response?.data?.message ?? "Failed to delete associate."
       );
       setShowDeleteConfirm(false);
     }
@@ -182,11 +182,11 @@ export default function MemberDetail() {
     <DashboardLayout title="Admin Panel" navItems={adminNavItems}>
       <div className="mb-6">
         <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-          Members / Profile
+          Associates / Profile
         </p>
-        <h1 className="text-2xl font-bold text-navy">Member detail</h1>
+        <h1 className="text-2xl font-bold text-navy">Associate details</h1>
         <p className="mt-1 text-sm text-charcoal/60">
-          Membership information, sales activity, and sponsor commissions.
+          Associate information, sales activity, and sponsor commissions.
         </p>
       </div>
       {loading && <p className="text-charcoal/60">Loading...</p>}
@@ -215,7 +215,7 @@ export default function MemberDetail() {
                   </div>
                   <div className="min-w-0">
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-light">
-                      Member profile
+                      Associate profile
                     </p>
                     <h2 className="truncate text-xl font-semibold sm:text-2xl">{member.name}</h2>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -234,7 +234,7 @@ export default function MemberDetail() {
                         {member.status}
                       </span>
                       <span className="rounded-full border border-gold-light/30 bg-gold-light/15 px-2.5 py-1 text-xs font-medium text-white">
-                        {member.rank?.name ?? "Member"}
+                        {member.rank?.name ?? "Associate"}
                       </span>
                     </div>
                   </div>
@@ -293,7 +293,7 @@ export default function MemberDetail() {
               <div>
                 <h3 className="text-base font-semibold text-navy">Sales history</h3>
                 <p className="mt-1 text-xs text-charcoal/55">
-                  Sales attributed to this member
+                  Sales attributed to this associate
                 </p>
               </div>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-charcoal/65">
@@ -304,7 +304,7 @@ export default function MemberDetail() {
               columns={saleColumns}
               rows={member.sales ?? []}
               rowKey={(s) => s.id}
-              emptyMessage="No sales recorded for this member."
+              emptyMessage="No sales recorded for this associate."
             />
           </Card>
 
@@ -313,7 +313,7 @@ export default function MemberDetail() {
               <div>
                 <h3 className="text-base font-semibold text-navy">Sponsor commissions</h3>
                 <p className="mt-1 text-xs text-charcoal/55">
-                  Earnings generated from sponsored members
+                  Earnings generated from sponsored associates
                 </p>
               </div>
               <span className="rounded-full bg-gold/10 px-2.5 py-1 text-xs font-medium text-navy">
@@ -344,7 +344,7 @@ export default function MemberDetail() {
               columns={commissionColumns}
               rows={commissions}
               rowKey={(c) => c.id}
-              emptyMessage="No commissions earned by this member."
+              emptyMessage="No commissions earned by this associate."
             />
           </Card>
         </div>
@@ -352,7 +352,7 @@ export default function MemberDetail() {
 
       <ConfirmDialog
         open={showDeleteConfirm}
-        title="Delete Member"
+        title="Delete Associate"
         confirmLabel="Delete"
         onConfirm={handleDelete}
         onClose={() => setShowDeleteConfirm(false)}
@@ -393,7 +393,7 @@ export default function MemberDetail() {
               resetCredentials.delivery.whatsapp !== "sent") && (
               <p className="mt-2 text-amber-700">
                 One or more messages could not be delivered. Share the temporary credentials
-                securely with the member.
+                securely with the associate.
               </p>
             )}
           </div>

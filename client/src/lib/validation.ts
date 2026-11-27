@@ -95,7 +95,7 @@ export type SaleFormErrors = Partial<Record<keyof SaleFormValues, string>>;
 
 export function validateSaleForm(values: SaleFormValues): SaleFormErrors {
   const errors: SaleFormErrors = {};
-  if (!values.memberId) errors.memberId = "Please select a member.";
+  if (!values.memberId) errors.memberId = "Please select an associate.";
   if (!values.plotReference.trim())
     errors.plotReference = "Plot reference is required.";
 

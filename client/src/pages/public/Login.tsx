@@ -77,7 +77,7 @@ export default function Login() {
     <PublicLayout>
       <section className="mx-auto flex max-w-md flex-col justify-center px-4 py-20 sm:px-6">
         <Card>
-          <h1 className="mb-1 text-2xl font-bold text-navy">Member & Admin Login</h1>
+          <h1 className="mb-1 text-2xl font-bold text-navy">Associate & Admin Login</h1>
           <p className="mb-6 text-sm text-charcoal/60">
             Sign in with the credentials provided by our admin team.
           </p>

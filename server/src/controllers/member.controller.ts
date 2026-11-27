@@ -118,14 +118,14 @@ export async function listMembers(req: Request, res: Response, next: NextFunctio
 export async function getMyMember(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user?.memberId) {
-      throw new ApiError(404, "No member profile linked to this account");
+      throw new ApiError(404, "No associate profile linked to this account");
     }
     const member = await prisma.member.findUnique({
       where: { id: req.user.memberId },
       include: memberDetailInclude,
     });
     if (!member) {
-      throw new ApiError(404, "Member not found");
+      throw new ApiError(404, "Associate not found");
     }
     res.json({ member: serializeMember(member, member.user.userId) });
   } catch (err) {
@@ -136,7 +136,7 @@ export async function getMyMember(req: Request, res: Response, next: NextFunctio
 export async function getMyNetwork(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user?.memberId) {
-      throw new ApiError(404, "No member profile linked to this account");
+      throw new ApiError(404, "No associate profile linked to this account");
     }
 
     const member = await prisma.member.findUnique({
@@ -144,7 +144,7 @@ export async function getMyNetwork(req: Request, res: Response, next: NextFuncti
       select: networkMemberSelect,
     });
     if (!member) {
-      throw new ApiError(404, "Member not found");
+      throw new ApiError(404, "Associate not found");
     }
 
     const sponsorChain: NetworkNode[] = [];
@@ -196,7 +196,7 @@ export async function getMemberById(req: Request, res: Response, next: NextFunct
       include: memberDetailInclude,
     });
     if (!member) {
-      throw new ApiError(404, "Member not found");
+      throw new ApiError(404, "Associate not found");
     }
     res.json({ member: serializeMember(member, member.user.userId) });
   } catch (err) {
@@ -220,7 +220,7 @@ export async function createMember(
       : null;
     if (input.sponsorMemberId) {
       if (!sponsor || sponsor.status !== "ACTIVE") {
-        throw new ApiError(400, "sponsorMemberId must reference an existing active member");
+        throw new ApiError(400, "The selected sponsor must be an existing active associate");
       }
     }
 
@@ -231,7 +231,7 @@ export async function createMember(
     if (sponsor && rank.commissionPercentage > sponsor.rank.commissionPercentage) {
       throw new ApiError(
         400,
-        "A member's rank cannot be higher than their sponsor's rank",
+        "An associate's rank cannot be higher than their sponsor's rank",
         "RANK_HIERARCHY"
       );
     }
@@ -324,7 +324,7 @@ export async function updateMember(
 
     const existing = await prisma.member.findUnique({ where: { id }, include: { rank: true } });
     if (!existing) {
-      throw new ApiError(404, "Member not found");
+      throw new ApiError(404, "Associate not found");
     }
 
     const sponsorMemberId =
@@ -332,14 +332,14 @@ export async function updateMember(
     let sponsorCommissionPercentage: number | null = null;
     if (sponsorMemberId) {
       if (input.sponsorMemberId && sponsorMemberId === id) {
-        throw new ApiError(400, "A member cannot sponsor themselves");
+        throw new ApiError(400, "An associate cannot sponsor themselves");
       }
       const sponsor = await prisma.member.findUnique({
         where: { id: sponsorMemberId },
         include: { rank: true },
       });
       if (!sponsor || (input.sponsorMemberId && sponsor.status !== "ACTIVE")) {
-        throw new ApiError(400, "sponsorMemberId must reference an existing active member");
+        throw new ApiError(400, "The selected sponsor must be an existing active associate");
       }
       sponsorCommissionPercentage = sponsor.rank.commissionPercentage;
     }
@@ -356,7 +356,7 @@ export async function updateMember(
     ) {
       throw new ApiError(
         400,
-        "A member's rank cannot be higher than their sponsor's rank",
+        "An associate's rank cannot be higher than their sponsor's rank",
         "RANK_HIERARCHY"
       );
     }
@@ -401,11 +401,11 @@ export async function deleteMember(req: Request, res: Response, next: NextFuncti
         },
       });
       if (!member) {
-        throw new ApiError(404, "Member not found");
+        throw new ApiError(404, "Associate not found");
       }
 
       if (member.sales.length > 0) {
-        throw new ApiError(400, "Cannot delete a member with recorded sales");
+        throw new ApiError(400, "Cannot delete an associate with recorded sales");
       }
 
       const commissions = [
@@ -413,7 +413,7 @@ export async function deleteMember(req: Request, res: Response, next: NextFuncti
         ...member.commissionsSourced,
       ];
       if (commissions.some((commission) => commission.type !== "JOINING")) {
-        throw new ApiError(400, "Cannot delete a member with sale commissions");
+        throw new ApiError(400, "Cannot delete an associate with sale commissions");
       }
 
       await tx.commission.deleteMany({
@@ -433,7 +433,7 @@ export async function deleteMember(req: Request, res: Response, next: NextFuncti
       await tx.user.delete({ where: { id: member.userId } });
     });
 
-    res.json({ message: "Member deleted" });
+    res.json({ message: "Associate deleted" });
   } catch (err) {
     next(err);
   }
@@ -449,7 +449,7 @@ export async function resetMemberPassword(
 
     const member = await prisma.member.findUnique({ where: { id }, include: { user: true } });
     if (!member) {
-      throw new ApiError(404, "Member not found");
+      throw new ApiError(404, "Associate not found");
     }
 
     const tempPassword = generateTempPassword();

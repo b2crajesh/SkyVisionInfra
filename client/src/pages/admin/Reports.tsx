@@ -24,7 +24,7 @@ const formatPercentage = (value: string) =>
 const saleColumns: Column<Sale>[] = [
   {
     key: "member",
-    header: "Member",
+    header: "Associate",
     render: (sale) => `${sale.memberCode ?? ""} ${sale.memberName ?? ""}`.trim(),
   },
   {
@@ -70,7 +70,7 @@ const commissionColumns: Column<Commission>[] = [
   },
   {
     key: "sourceMember",
-    header: "Source member",
+    header: "Source associate",
     render: (commission) =>
       `${commission.sourceMember.name} (${commission.sourceMember.memberCode})`,
   },
@@ -303,7 +303,7 @@ export default function Reports() {
           <Card className="relative overflow-hidden !p-5">
             <div className="absolute inset-y-0 left-0 w-1 bg-gold" />
             <p className="text-xs font-semibold uppercase tracking-wide text-charcoal/55">
-              Total members
+              Total associates
             </p>
             <p className="mt-3 text-3xl font-bold tracking-tight text-navy">
               {Number(summary.totalMembers).toLocaleString("en-IN")}
@@ -352,7 +352,7 @@ export default function Reports() {
           id="report-sales-search"
           type="search"
           className="mb-4 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-navy shadow-sm outline-none transition placeholder:text-charcoal/40 focus:border-gold focus:ring-2 focus:ring-gold/20 sm:max-w-md"
-          placeholder="Member name, member code, or plot reference"
+          placeholder="Associate name, associate code, or plot reference"
           value={salesSearch}
           onChange={(event) => {
             setSalesPage(1);
@@ -400,7 +400,7 @@ export default function Reports() {
               id="report-commission-search"
               type="search"
               className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-navy shadow-sm outline-none transition placeholder:text-charcoal/40 focus:border-gold focus:ring-2 focus:ring-gold/20"
-              placeholder="Recipient or source member name/code"
+              placeholder="Recipient or source associate name/code"
               value={commissionSearch}
               onChange={(event) => {
                 setCommissionPage(1);

@@ -84,7 +84,7 @@ export default function EditMember() {
           setSponsor({ id: m.sponsor.id, label: `${m.sponsor.memberCode} - ${m.sponsor.name}` });
         }
       })
-      .catch(() => toast("Unable to load member details.", "error"))
+      .catch(() => toast("Unable to load associate details.", "error"))
       .finally(() => setLoading(false));
   }, [id, toast]);
 
@@ -130,7 +130,7 @@ export default function EditMember() {
         relationship: values.relationship,
         rankId: values.rankId,
       });
-      toast("Member updated successfully.", "success");
+      toast("Associate updated successfully.", "success");
       navigate(`/admin/members/${id}`);
     } catch (err) {
       const response = axios.isAxiosError<{ message?: string; code?: string }>(err)
@@ -141,7 +141,7 @@ export default function EditMember() {
         return;
       }
       const message = response?.message;
-      toast(message ?? "Failed to update member. Please check the details and try again.", "error");
+      toast(message ?? "Failed to update associate. Please check the details and try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -151,16 +151,16 @@ export default function EditMember() {
     <DashboardLayout title="Admin Panel" navItems={adminNavItems}>
       <div className="mb-6">
         <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-          Members / Account
+          Associates / Account
         </p>
-        <h1 className="text-2xl font-bold text-navy sm:text-3xl">Edit Member</h1>
+        <h1 className="text-2xl font-bold text-navy sm:text-3xl">Edit Associate</h1>
         <p className="mt-1 text-sm text-charcoal/60">
-          Update contact, membership, and nominee details.
+          Update associate contact, membership, and nominee details.
         </p>
       </div>
       {loading ? (
         <Card className="max-w-5xl">
-          <div className="animate-pulse space-y-4" aria-label="Loading member details">
+          <div className="animate-pulse space-y-4" aria-label="Loading associate details">
             <div className="h-5 w-48 rounded bg-slate-100" />
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="h-11 rounded-xl bg-slate-100" />
@@ -174,7 +174,7 @@ export default function EditMember() {
         <Card className="!overflow-hidden !p-0 sm:!p-0">
           <form onSubmit={handleSubmit} noValidate>
             <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-8">
-              <h2 className="text-sm font-semibold text-navy">Member details</h2>
+              <h2 className="text-sm font-semibold text-navy">Associate details</h2>
               <p className="mt-1 text-xs text-charcoal/55">
                 Make changes carefully; updated details will be saved to this account.
               </p>
@@ -333,7 +333,7 @@ export default function EditMember() {
                 to={`/admin/members/${id}`}
                 className="text-center text-sm font-medium text-charcoal/65 transition hover:text-navy sm:text-left"
               >
-                Cancel and return to member
+                Cancel and return to associate
               </Link>
               <Button type="submit" disabled={submitting} className="min-w-40">
                 {submitting ? "Saving..." : "Save Changes"}

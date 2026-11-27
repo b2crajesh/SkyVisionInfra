@@ -7,27 +7,27 @@ const tiers = [
   {
     name: "Junior Executive",
     description:
-      "Entry-level membership for new participants. Access to your member dashboard, plot browsing, and referral tools.",
+      "Entry-level membership for new participants. Access to your associate dashboard, plot browsing, and referral tools.",
   },
   {
     name: "Executive",
     description:
-      "Awarded to members who reach an initial booking and sponsorship milestone, unlocking recognition within the network.",
+      "Awarded to associates who reach an initial booking and sponsorship milestone, unlocking recognition within the network.",
   },
   {
     name: "Senior Executive",
     description:
-      "For members with a sustained record of qualifying activity and sponsorship, reflecting deeper engagement with the program.",
+      "For associates with a sustained record of qualifying activity and sponsorship, reflecting deeper engagement with the program.",
   },
   {
     name: "Manager",
     description:
-      "A senior rank recognising long-standing members who have built substantial referral chains and transaction history.",
+      "A senior rank recognising long-standing associates who have built substantial referral chains and transaction history.",
   },
   {
     name: "Senior Manager",
     description:
-      "A senior recognition tier for members with exceptional, sustained contribution to the network's growth.",
+      "A senior recognition tier for associates with exceptional, sustained contribution to the network's growth.",
   },
   {
     name: "Ambassador",
@@ -43,8 +43,8 @@ export default function Membership() {
         <Reveal>
           <SectionHeading
             eyebrow="Membership Program"
-            title="A Structured Path for Every Member"
-            subtitle="Membership with Sky Vision Infra gives you a documented profile, access to plot bookings, and the ability to sponsor new members into the network. Rank progression reflects engagement and qualifying activity, not payment alone."
+            title="A Structured Path for Every Associate"
+            subtitle="The associate program with Sky Vision Infra gives you a documented profile, access to plot bookings, and the ability to sponsor new associates into the network. Rank progression reflects engagement and qualifying activity, not payment alone."
           />
         </Reveal>
 
@@ -63,9 +63,9 @@ export default function Membership() {
           <Card>
             <h3 className="mb-2 text-lg font-semibold text-navy">What Membership Includes</h3>
             <ul className="list-inside list-disc space-y-1 text-sm text-charcoal/70">
-              <li>A unique member code and secure login to your personal dashboard</li>
+              <li>A unique associate code and secure login to your personal dashboard</li>
               <li>Visibility into your own booking amount, plot sales, and rank</li>
-              <li>The ability to sponsor and refer new members into the network</li>
+              <li>The ability to sponsor and refer new associates into the network</li>
               <li>Access to plot booking opportunities as they become available</li>
               <li>Nominee details on record for account continuity</li>
             </ul>

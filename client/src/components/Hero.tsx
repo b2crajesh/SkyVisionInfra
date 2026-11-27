@@ -24,7 +24,7 @@ export default function Hero() {
         </h1>
         <p className="mt-6 max-w-xl text-lg text-white/80">
           We identify, develop, and manage real estate opportunities while
-          empowering a community of members and sponsors to share in
+          empowering a community of associates and sponsors to share in
           transparent, well-governed growth.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
@@ -38,7 +38,7 @@ export default function Hero() {
               variant="outline"
               className="border-white px-6 py-3 text-base text-white hover:bg-white hover:text-navy"
             >
-              Become a Member
+              Become an Associate
             </Button>
           </Link>
         </div>

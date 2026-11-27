@@ -81,7 +81,7 @@ export default function AddSale() {
         </p>
         <h1 className="text-2xl font-bold text-navy sm:text-3xl">Record a Sale</h1>
         <p className="mt-1 text-sm text-charcoal/60">
-          Add a plot sale and associate it with the responsible member.
+          Add a plot sale and associate it with the responsible associate.
         </p>
       </div>
       <Card className="!overflow-hidden !p-0 sm:!p-0">
@@ -97,12 +97,12 @@ export default function AddSale() {
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-navy">Transaction information</h3>
                 <p className="mt-0.5 text-xs text-charcoal/55">
-                  Select the member and enter the plot measurements.
+                  Select the associate and enter the plot measurements.
                 </p>
               </div>
               <SearchableDropdown
-                label="Member"
-                placeholder="Search member by name or code"
+                label="Associate"
+                placeholder="Search associate by name or code"
                 fetchOptions={fetchMembers}
                 value={member}
                 onSelect={setMember}

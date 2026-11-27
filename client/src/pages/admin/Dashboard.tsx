@@ -168,7 +168,7 @@ export default function Dashboard() {
             className="inline-flex items-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-navy/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           >
             <span aria-hidden="true" className="text-lg leading-none">+</span>
-            Add member
+            Add associate
           </Link>
           <Link
             to="/admin/sales/new"
@@ -190,9 +190,9 @@ export default function Dashboard() {
         <div className="space-y-6">
           <section aria-label="Business summary" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <SummaryMetric
-              label="Total members"
+              label="Total associates"
               value={summary.totalMembers.toLocaleString("en-IN")}
-              detail="Registered member accounts"
+              detail="Registered associate accounts"
               symbol="M"
               tone="gold"
             />
@@ -221,7 +221,7 @@ export default function Dashboard() {
               <div>
                 <h2 className="text-base font-semibold text-navy">Current month</h2>
                 <p className="mt-1 text-xs text-charcoal/55">
-                  Sales and member registrations for this month
+                  Sales and associate registrations for this month
                 </p>
               </div>
               <span className="rounded-full bg-gold/10 px-3 py-1 text-xs font-semibold text-navy">
@@ -243,10 +243,10 @@ export default function Dashboard() {
                 tone="gold"
               />
               <CurrentMonthMetric
-                title="Member growth"
+                title="Associate growth"
                 value={summary.currentMonthActivity.memberCount.toLocaleString("en-IN")}
                 detail={`${
-                  summary.currentMonthActivity.memberCount === 1 ? "New member" : "New members"
+                  summary.currentMonthActivity.memberCount === 1 ? "New associate" : "New associates"
                 } registered this month`}
                 symbol="M"
                 tone="blue"
@@ -258,7 +258,7 @@ export default function Dashboard() {
             <Card className="xl:col-span-2">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold text-navy">Recent members</h2>
+                  <h2 className="text-base font-semibold text-navy">Recent associates</h2>
                   <p className="mt-1 text-xs text-charcoal/55">
                     Latest registrations in your organization
                   </p>
@@ -272,7 +272,7 @@ export default function Dashboard() {
               </div>
               {summary.recentMembers.length === 0 ? (
                 <p className="rounded-xl bg-slate-50 px-4 py-8 text-center text-sm text-charcoal/55">
-                  No members have been registered yet.
+                  No associates have been registered yet.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -297,7 +297,7 @@ export default function Dashboard() {
                       </span>
                       <span className="ml-12 flex items-center gap-3 text-right sm:ml-0">
                         <span className="hidden rounded-full bg-gold/10 px-2.5 py-1 text-[11px] font-medium text-navy sm:inline-flex">
-                          {member.rank?.name ?? "Member"}
+                          {member.rank?.name ?? "Associate"}
                         </span>
                         <span className="text-xs text-charcoal/55">
                           {formatDate(member.createdAt)}
@@ -314,7 +314,7 @@ export default function Dashboard() {
               <p className="mt-1 text-xs text-charcoal/55">Common administration tasks</p>
               <div className="mt-4 space-y-2">
                 {[
-                  { to: "/admin/members/new", label: "Register a member", mark: "+" },
+                  { to: "/admin/members/new", label: "Register an associate", mark: "+" },
                   { to: "/admin/sales/new", label: "Record a sale", mark: "₹" },
                   { to: "/admin/reports", label: "Open reports", mark: "↗" },
                 ].map((action) => (

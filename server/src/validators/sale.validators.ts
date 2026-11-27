@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createSaleSchema = z.object({
-  memberId: z.string().uuid("memberId must be a valid id"),
+  memberId: z.string().uuid("Associate selection is invalid"),
   plotReference: z.string().min(1, "plotReference is required"),
   area: z.number({ invalid_type_error: "area must be a number" }).positive("area must be positive"),
   rate: z.number({ invalid_type_error: "rate must be a number" }).positive("rate must be positive"),

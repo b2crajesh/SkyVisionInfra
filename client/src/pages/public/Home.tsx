@@ -37,7 +37,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="What We Do"
             title="A Full-Spectrum Real Estate Partner"
-            subtitle="From land acquisition to member-driven growth, Sky Vision Infra brings structure and transparency to every stage of the real estate journey."
+            subtitle="From land acquisition to associate-driven growth, Sky Vision Infra brings structure and transparency to every stage of the real estate journey."
           />
         </Reveal>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -61,7 +61,7 @@ export default function Home() {
               onDark
               eyebrow="Why Sky Vision"
               title="Built on Trust, Governance, and Long-Term Thinking"
-              subtitle="We hold ourselves to disciplined documentation, transparent member records, and a compensation structure that is disclosed in full, not hidden in fine print."
+              subtitle="We hold ourselves to disciplined documentation, transparent associate records, and a compensation structure that is disclosed in full, not hidden in fine print."
             />
           </Reveal>
           <div className="grid grid-cols-1 gap-6 text-white/90 sm:grid-cols-3">
@@ -74,7 +74,7 @@ export default function Home() {
             <Reveal>
               <div>
                 <p className="mb-2 text-3xl font-bold text-gold-light">100%</p>
-                <p className="text-sm">Documented member records with masked, secure identity data.</p>
+                <p className="text-sm">Documented associate records with masked, secure identity data.</p>
               </div>
             </Reveal>
             <Reveal>
@@ -96,7 +96,7 @@ export default function Home() {
           />
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/membership">
-              <Button variant="primary">Become a Member</Button>
+              <Button variant="primary">Become an Associate</Button>
             </Link>
             <Link to="/contact">
               <Button variant="outline">Talk to Us</Button>

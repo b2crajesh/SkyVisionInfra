@@ -7,22 +7,22 @@ const tiers = [
   {
     name: "Joining Commission",
     detail:
-      "When a new member joins through a sponsor, 20% of the member's booking amount is payable as the joining commission.",
+      "When a new associate joins through a sponsor, 20% of the associate's booking amount is payable as the joining commission.",
   },
   {
     name: "Direct Sale Commission",
     detail:
-      "Applicable when a member's directly sponsored referral completes a qualifying plot booking.",
+      "Applicable when an associate's directly sponsored referral completes a qualifying plot booking.",
   },
   {
     name: "Rank Advancement Bonus",
     detail:
-      "A one-time recognition when a member's qualifying activity results in a rank promotion.",
+      "A one-time recognition when an associate's qualifying activity results in a rank promotion.",
   },
   {
     name: "Network Development Credit",
     detail:
-      "Calculated periodically based on the documented sales activity of a member's sponsored network.",
+      "Calculated periodically based on the documented sales activity of an associate's sponsored network.",
   },
 ];
 
@@ -34,7 +34,7 @@ export default function Commission() {
           <SectionHeading
             eyebrow="Commission Plan"
             title="A Transparent Compensation Structure"
-            subtitle="Our commission plan rewards qualifying sales and sponsorship activity. Every calculation is tied to logged sales and member records in our system."
+            subtitle="Our commission plan rewards qualifying sales and sponsorship activity. Every calculation is tied to logged sales and associate records in our system."
           />
         </Reveal>
 
@@ -45,7 +45,7 @@ export default function Commission() {
             qualifying activity, verification, and the company's
             compensation-plan terms and conditions, which may be revised from
             time to time. Sky Vision Infra & Developers makes no
-            representation regarding potential earnings, and no member should
+            representation regarding potential earnings, and no associate should
             treat commission participation as a substitute for independent
             financial advice.
           </div>
@@ -66,7 +66,7 @@ export default function Commission() {
           <Card>
             <h3 className="mb-2 text-lg font-semibold text-navy">Eligibility Basics</h3>
             <ul className="list-inside list-disc space-y-1 text-sm text-charcoal/70">
-              <li>Member account must be in active, good standing</li>
+              <li>Associate account must be in active, good standing</li>
               <li>Underlying plot sale must be completed and recorded</li>
               <li>Sponsor relationship must be verified in our system</li>
               <li>Commission terms are subject to periodic review and revision</li>

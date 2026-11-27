@@ -16,7 +16,7 @@ export default function Footer() {
           </div>
           <p className="text-sm text-white">
             Building lasting value through land, property development, and a
-            transparent, member-driven referral network.
+            transparent, associate-driven referral network.
           </p>
         </div>
 

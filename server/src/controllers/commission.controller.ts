@@ -61,7 +61,7 @@ function getCommissionOrderBy(
 export async function getMyCommissions(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user?.memberId) {
-      throw new ApiError(404, "No member profile linked to this account");
+      throw new ApiError(404, "No associate profile linked to this account");
     }
 
     const where = { memberId: req.user.memberId };

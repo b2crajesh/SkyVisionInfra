@@ -11,20 +11,20 @@ export default function PrivacyPolicy() {
             Sky Vision Infra & Developers collects personal information such
             as name, address, date of birth, government identity numbers
             (Aadhaar and PAN), and contact details solely for the purpose of
-            member verification, plot booking, and account management.
+            associate verification, plot booking, and account management.
           </p>
           <p>
             Sensitive identity numbers are stored securely and displayed in
-            masked form throughout our systems. Access to full member data is
+            masked form throughout our systems. Access to full associate data is
             restricted to authorised administrative personnel.
           </p>
           <p>
-            We do not sell or share member data with third parties for
+            We do not sell or share associate data with third parties for
             marketing purposes. Data may be shared with regulatory or
             government bodies where required by law.
           </p>
           <p>
-            Members may request a copy of their stored data or request
+            Associates may request a copy of their stored data or request
             corrections by contacting our support team.
           </p>
         </div>

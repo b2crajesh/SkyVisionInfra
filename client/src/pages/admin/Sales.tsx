@@ -174,7 +174,7 @@ export default function Sales() {
   };
 
   const columns: Column<Sale>[] = [
-    { key: "memberCode", header: "Member", render: (sale) => `${sale.memberCode ?? ""} ${sale.memberName ?? ""}` },
+    { key: "memberCode", header: "Associate", render: (sale) => `${sale.memberCode ?? ""} ${sale.memberName ?? ""}` },
     { key: "plotReference", header: "Plot Reference", sortable: true, render: (sale) => sale.plotReference },
     { key: "area", header: "Area", sortable: true, render: (sale) => sale.area },
     { key: "rate", header: "Rate / sq. ft.", sortable: true, render: (sale) => Number(sale.rate).toLocaleString("en-IN") },
@@ -345,8 +345,8 @@ export default function Sales() {
             </div>
             <form onSubmit={handleSave} noValidate className="p-5 sm:p-7">
               <SearchableDropdown
-                label="Member"
-                placeholder="Search member by name or code"
+                label="Associate"
+                placeholder="Search associate by name or code"
                 fetchOptions={fetchMembers}
                 value={member}
                 onSelect={setMember}

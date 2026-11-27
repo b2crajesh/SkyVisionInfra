@@ -80,7 +80,7 @@ export default function Contact() {
           <SectionHeading
             eyebrow="Contact"
             title="Get in Touch"
-            subtitle="Our team is available to answer questions about membership, plots, and sponsorship."
+            subtitle="Our team is available to answer questions about the associate program, plots, and sponsorship."
           />
         </Reveal>
 

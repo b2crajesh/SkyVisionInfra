@@ -32,19 +32,19 @@ const services = [
     icon: "🔗",
     title: "Sponsor & Referral Program",
     description:
-      "Members can sponsor new members into the network, building a documented referral chain that is tracked transparently in every profile.",
+      "Associates can sponsor new associates into the network, building a documented referral chain that is tracked transparently in every profile.",
   },
   {
     icon: "🗂️",
-    title: "Member Management",
+    title: "Associate Management",
     description:
-      "A secure back-office system for onboarding, verifying, and maintaining member records, ranks, and account status.",
+      "A secure back-office system for onboarding, verifying, and maintaining associate records, ranks, and account status.",
   },
   {
     icon: "📋",
     title: "Plot Sales Management",
     description:
-      "Every plot sale is logged against a member and a reference, with area, amount, and date tracked for full transaction history.",
+      "Every plot sale is logged against an associate and a reference, with area, amount, and date tracked for full transaction history.",
   },
   {
     icon: "💰",
@@ -62,7 +62,7 @@ export default function Services() {
           <SectionHeading
             eyebrow="Our Services"
             title="What Sky Vision Infra Offers"
-            subtitle="A complete set of services spanning land development, sales, and member-driven growth - each built on documented, auditable processes."
+            subtitle="A complete set of services spanning land development, sales, and associate-driven growth - each built on documented, auditable processes."
           />
         </Reveal>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

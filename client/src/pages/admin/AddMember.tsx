@@ -120,7 +120,7 @@ export default function AddMember() {
         return;
       }
       const message = response?.message;
-      toast(message ?? "Failed to create member. Please check the details and try again.", "error");
+      toast(message ?? "Failed to create associate. Please check the details and try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -137,17 +137,17 @@ export default function AddMember() {
     <DashboardLayout title="Admin Panel" navItems={adminNavItems}>
       <div className="mb-6">
         <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-          Members / Registration
+          Associates / Registration
         </p>
-        <h1 className="text-2xl font-bold text-navy sm:text-3xl">Add Member</h1>
+        <h1 className="text-2xl font-bold text-navy sm:text-3xl">Add Associate</h1>
         <p className="mt-1 text-sm text-charcoal/60">
-          Enter the member’s personal information, membership details, and nominee.
+          Enter the associate’s personal information, program details, and nominee.
         </p>
       </div>
       <Card className="!overflow-hidden !p-0 sm:!p-0">
         <form onSubmit={handleSubmit} noValidate>
           <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-8">
-            <h2 className="text-sm font-semibold text-navy">Member registration</h2>
+            <h2 className="text-sm font-semibold text-navy">Associate registration</h2>
             <p className="mt-1 text-xs text-charcoal/55">
               Complete each section before creating the account.
             </p>
@@ -319,10 +319,10 @@ export default function AddMember() {
           </div>
           <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <p className="text-xs text-charcoal/55">
-              Login credentials are generated after the member is created.
+              Login credentials are generated after the associate is created.
             </p>
             <Button type="submit" disabled={submitting} className="min-w-40">
-              {submitting ? "Creating..." : "Create Member"}
+              {submitting ? "Creating..." : "Create Associate"}
             </Button>
           </div>
         </form>
@@ -330,7 +330,7 @@ export default function AddMember() {
 
       <ConfirmDialog
         open={!!result}
-        title="Member Created Successfully"
+        title="Associate Created Successfully"
         confirmLabel="Done"
         hideCancel
         onConfirm={resetForm}
@@ -349,7 +349,7 @@ export default function AddMember() {
           {(result?.delivery.email !== "sent" || result?.delivery.whatsapp !== "sent") && (
             <p className="mt-2 text-amber-700">
               One or more messages could not be delivered. Share the temporary credentials
-              securely with the member.
+              securely with the associate.
             </p>
           )}
         </div>

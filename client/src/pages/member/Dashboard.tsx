@@ -29,7 +29,7 @@ const commissionHeaders: {
   label: string;
   alignRight?: boolean;
 }[] = [
-  { key: "sourceMember", label: "Source member" },
+  { key: "sourceMember", label: "Source associate" },
   { key: "type", label: "Type" },
   { key: "baseAmount", label: "Base amount", alignRight: true },
   { key: "percentage", label: "Rate", alignRight: true },
@@ -152,7 +152,7 @@ function NetworkBranch({
             type="button"
             aria-expanded={childrenExpanded}
             aria-controls={`network-children-${node.id}`}
-            aria-label={`${childrenExpanded ? "Collapse" : "Expand"} ${node.sponsoredMembers.length} members sponsored by ${node.name}`}
+            aria-label={`${childrenExpanded ? "Collapse" : "Expand"} ${node.sponsoredMembers.length} associates sponsored by ${node.name}`}
             onClick={() => setChildrenExpanded((expanded) => !expanded)}
             className="relative z-10 my-1 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-navy shadow-soft transition-colors hover:border-gold hover:text-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           >
@@ -212,7 +212,7 @@ export default function MemberDashboard() {
     api
       .get<{ member: Member }>("/members/me")
       .then(({ data }) => setMember(data.member))
-      .catch(() => setError("Unable to load your member record."))
+      .catch(() => setError("Unable to load your associate record."))
       .finally(() => setLoading(false));
 
     api
@@ -286,7 +286,7 @@ export default function MemberDashboard() {
   }, [commissions, commissionSearch, commissionSort]);
 
   return (
-    <DashboardLayout title="Member Portal" navItems={memberNavItems}>
+    <DashboardLayout title="Associate Portal" navItems={memberNavItems}>
       <h1 className="mb-6 text-2xl font-bold text-navy">My Dashboard</h1>
       {loading && <p className="text-charcoal/60">Loading...</p>}
       {error && <p className="text-red-600">{error}</p>}
@@ -309,11 +309,11 @@ export default function MemberDashboard() {
                   </div>
                   <div className="min-w-0">
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-light">
-                      Member profile
+                      Associate profile
                     </p>
                     <h2 className="truncate text-xl font-semibold sm:text-2xl">{member.name}</h2>
                     <p className="mt-1 text-sm text-white/70">
-                      Member code <span className="font-medium text-white">{member.memberCode}</span>
+                      Associate code <span className="font-medium text-white">{member.memberCode}</span>
                     </p>
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function MemberDashboard() {
                     {member.status}
                   </span>
                   <span className="inline-flex items-center rounded-full border border-gold-light/30 bg-gold-light/15 px-3 py-1.5 text-xs font-medium text-white">
-                    {member.rank?.name ?? "Member"}
+                    {member.rank?.name ?? "Associate"}
                   </span>
                 </div>
               </div>
@@ -336,7 +336,7 @@ export default function MemberDashboard() {
             <div className="p-5 sm:p-7">
               <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-semibold text-navy">Member details</h3>
+                  <h3 className="text-sm font-semibold text-navy">Associate details</h3>
                   <p className="mt-0.5 text-xs text-charcoal/55">
                     Personal and account information
                   </p>
@@ -374,7 +374,7 @@ export default function MemberDashboard() {
           <Card>
             <h3 className="mb-1 text-lg font-semibold text-navy">My Sponsor Tree</h3>
             <p className="mb-5 text-sm text-charcoal/60">
-              Your sponsors are shown above you, and the members you sponsored appear below.
+              Your sponsors are shown above you, and the associates you sponsored appear below.
             </p>
             <p className="mb-3 text-xs text-charcoal/60">
               Scroll within this panel to explore the full tree.
@@ -393,7 +393,7 @@ export default function MemberDashboard() {
                 <NetworkBranch node={network.member} isCurrent />
                 {network.member.sponsoredMembers.length === 0 && (
                   <p className="mt-4 rounded-full bg-white px-4 py-2 text-center text-sm text-charcoal/60 shadow-soft">
-                    You have not sponsored any members yet.
+                    You have not sponsored any associates yet.
                   </p>
                 )}
                 </div>
@@ -550,7 +550,7 @@ export default function MemberDashboard() {
                       <td colSpan={8} className="px-4 py-12 text-center">
                         <p className="font-medium text-navy">No matching commissions</p>
                         <p className="mt-1 text-sm text-charcoal/55">
-                          Try another name, member code, commission type, or date.
+                          Try another name, associate code, commission type, or date.
                         </p>
                       </td>
                     </tr>

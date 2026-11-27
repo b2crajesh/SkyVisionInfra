@@ -13,13 +13,13 @@ const steps = [
     step: "2",
     title: "Verification",
     description:
-      "Our team verifies your identity documents and, if applicable, your sponsoring member's details.",
+      "Our team verifies your identity documents and, if applicable, your sponsoring associate's details.",
   },
   {
     step: "3",
     title: "Membership Enrolment",
     description:
-      "Once approved, your member record is created with a unique member code, rank, and secure login credentials.",
+      "Once approved, your associate record is created with a unique associate code, rank, and secure login credentials.",
   },
   {
     step: "4",
@@ -31,7 +31,7 @@ const steps = [
     step: "5",
     title: "Ongoing Access",
     description:
-      "Log in anytime to view your member profile, booking history, and sales associated with your account.",
+      "Log in anytime to view your associate profile, booking history, and sales associated with your account.",
   },
 ];
 
@@ -43,7 +43,7 @@ export default function HowItWorks() {
           <SectionHeading
             eyebrow="How It Works"
             title="From Enquiry to Ownership"
-            subtitle="A straightforward, documented path for every new member and plot buyer."
+            subtitle="A straightforward, documented path for every new associate and plot buyer."
           />
         </Reveal>
         <div className="space-y-6">

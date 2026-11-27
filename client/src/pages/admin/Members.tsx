@@ -88,11 +88,11 @@ export default function Members() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold">
-            Member directory
+            Associate directory
           </p>
-          <h1 className="text-2xl font-bold text-navy sm:text-3xl">Members</h1>
+          <h1 className="text-2xl font-bold text-navy sm:text-3xl">Associates</h1>
           <p className="mt-1 text-sm text-charcoal/60">
-            Search, review, and manage member accounts.
+            Search, review, and manage associate accounts.
           </p>
         </div>
         <Link
@@ -100,7 +100,7 @@ export default function Members() {
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-navy/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         >
           <span aria-hidden="true" className="text-lg leading-none">+</span>
-          Add member
+          Add associate
         </Link>
       </div>
 
@@ -108,13 +108,13 @@ export default function Members() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-end">
           <div>
             <label htmlFor="member-search" className="mb-1.5 block text-xs font-semibold text-charcoal/70">
-              Search members
+              Search associates
             </label>
             <input
               id="member-search"
               type="search"
               className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-navy shadow-sm outline-none transition placeholder:text-charcoal/40 focus:border-gold focus:ring-2 focus:ring-gold/20"
-              placeholder="Search by name or member code"
+              placeholder="Search by name or associate code"
               value={search}
               onChange={(e) => {
                 setPage(1);
@@ -143,10 +143,10 @@ export default function Members() {
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
           <p className="text-sm font-medium text-navy">
-            {total.toLocaleString("en-IN")} {total === 1 ? "member" : "members"}
+            {total.toLocaleString("en-IN")} {total === 1 ? "associate" : "associates"}
           </p>
           <p className="text-xs text-charcoal/55">
-            {loading ? "Updating results..." : "Click a row to view member details"}
+            {loading ? "Updating results..." : "Click a row to view associate details"}
           </p>
         </div>
       </Card>
@@ -160,7 +160,7 @@ export default function Members() {
           sortDir={sortDir}
           onSort={handleSort}
           onRowClick={(m) => navigate(`/admin/members/${m.id}`)}
-          emptyMessage={loading ? "Loading members..." : "No members found."}
+          emptyMessage={loading ? "Loading associates..." : "No associates found."}
         />
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-charcoal/60">

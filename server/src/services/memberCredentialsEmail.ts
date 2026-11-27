@@ -39,11 +39,11 @@ export async function sendMemberCredentialsEmail(
     await transporter.sendMail({
       from: env.CONTACT_EMAIL_FROM || SMTP_USER,
       to: email,
-      subject: "Your Sky Vision Infra member login credentials",
+      subject: "Your Sky Vision Infra associate login credentials",
       text: [
         `Hello ${name},`,
         "",
-        "Your member account has been created. Use the credentials below to sign in:",
+        "Your associate account has been created. Use the credentials below to sign in:",
         `User ID: ${userId}`,
         `Temporary password: ${tempPassword}`,
         "",
@@ -53,7 +53,7 @@ export async function sendMemberCredentialsEmail(
       ].join("\n"),
       html: `
         <p>Hello ${escapeHtml(name)},</p>
-        <p>Your member account has been created. Use the credentials below to sign in:</p>
+        <p>Your associate account has been created. Use the credentials below to sign in:</p>
         <p><strong>User ID:</strong> ${escapeHtml(userId)}<br>
         <strong>Temporary password:</strong> ${escapeHtml(tempPassword)}</p>
         <p>You will be asked to change your password after signing in.</p>

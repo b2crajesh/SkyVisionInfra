@@ -129,7 +129,7 @@ export async function listSales(req: Request, res: Response, next: NextFunction)
 export async function getMySales(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user?.memberId) {
-      throw new ApiError(404, "No member profile linked to this account");
+      throw new ApiError(404, "No associate profile linked to this account");
     }
     const sales = await prisma.sale.findMany({
       where: { memberId: req.user.memberId },
@@ -159,7 +159,7 @@ export async function createSale(
         include: { rank: true },
       });
       if (!member) {
-        throw new ApiError(400, "memberId does not reference an existing member");
+        throw new ApiError(400, "The selected associate does not exist");
       }
 
       const sale = await tx.sale.create({
@@ -199,7 +199,7 @@ export async function updateSale(
         include: { rank: true },
       });
       if (!member) {
-        throw new ApiError(400, "memberId does not reference an existing member");
+        throw new ApiError(400, "The selected associate does not exist");
       }
 
       const existingSale = await tx.sale.findUnique({ where: { id: req.params.id } });

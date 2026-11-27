@@ -8,7 +8,7 @@ export default function Terms() {
         <SectionHeading eyebrow="Legal" title="Terms of Service" />
         <div className="space-y-4 text-sm text-charcoal/70">
           <p>
-            By registering as a member or using this website, you agree to
+            By registering as an associate or using this website, you agree to
             provide accurate information and to use your account solely for
             its intended purpose of viewing your membership, booking, and
             sales records.
@@ -16,7 +16,7 @@ export default function Terms() {
           <p>
             Membership, plot booking, and sale records displayed on this
             platform are maintained by Sky Vision Infra & Developers'
-            administrative team. Members may not alter these records
+            administrative team. Associates may not alter these records
             directly.
           </p>
           <p>

@@ -11,7 +11,7 @@ export default function About() {
           <SectionHeading
             eyebrow="About Us"
             title="Sky Vision Infra & Developers"
-            subtitle="We are a real estate development and member services company focused on responsibly sourcing, developing, and managing land assets while building a transparent community of participants."
+            subtitle="We are a real estate development and associate services company focused on responsibly sourcing, developing, and managing land assets while building a transparent community of participants."
           />
         </Reveal>
 
@@ -22,8 +22,8 @@ export default function About() {
             ambiguity, Sky Vision Infra & Developers works across the full
             lifecycle of a real estate project - from due diligence and
             acquisition, through planning and infrastructure development, to
-            sales and long-term member engagement. Our administrative systems
-            are built to keep every member record, transaction, and
+            sales and long-term associate engagement. Our administrative systems
+            are built to keep every associate record, transaction, and
             commission calculation auditable and secure.
           </p>
         </Reveal>
@@ -35,7 +35,7 @@ export default function About() {
               <p className="text-sm text-charcoal/70">
                 To develop well-planned land assets and deliver them through a
                 transparent membership and sales process that treats every
-                member as a long-term stakeholder, not a one-time customer.
+                associate as a long-term stakeholder, not a one-time customer.
               </p>
             </Card>
           </Reveal>
@@ -45,7 +45,7 @@ export default function About() {
               <p className="text-sm text-charcoal/70">
                 To be recognised as the region's most trusted land and
                 infrastructure developer, known for disciplined governance,
-                accurate record-keeping, and fair treatment of members and
+                accurate record-keeping, and fair treatment of associates and
                 sponsors alike.
               </p>
             </Card>
@@ -55,7 +55,7 @@ export default function About() {
               <h3 className="mb-2 text-lg font-semibold text-navy">Our Values</h3>
               <ul className="list-inside list-disc space-y-1 text-sm text-charcoal/70">
                 <li>Transparency in documentation and pricing</li>
-                <li>Integrity in every member interaction</li>
+                <li>Integrity in every associate interaction</li>
                 <li>Accountability in commission calculations</li>
                 <li>Long-term thinking over short-term gain</li>
               </ul>
@@ -67,11 +67,11 @@ export default function About() {
           <Card>
             <h3 className="mb-2 text-lg font-semibold text-navy">Trust & Governance</h3>
             <p className="text-sm text-charcoal/70">
-              Every member record in our system is protected behind
+              Every associate record in our system is protected behind
               authenticated access, sensitive identifiers such as Aadhaar and
               PAN numbers are masked in day-to-day views, and all sales and
               commission data is logged with dates and references. Our admin
-              team reviews new member applications, sponsor relationships,
+              team reviews new associate applications, sponsor relationships,
               and sales entries before they are finalised, ensuring that
               growth never comes at the cost of accuracy.
             </p>

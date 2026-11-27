@@ -21,7 +21,7 @@ export default function Disclaimer() {
             the terms of our compensation plan, which may change over time.
           </p>
           <p>
-            Prospective members and buyers are encouraged to conduct their
+            Prospective associates and buyers are encouraged to conduct their
             own due diligence and seek independent legal or financial advice
             before making any commitment.
           </p>

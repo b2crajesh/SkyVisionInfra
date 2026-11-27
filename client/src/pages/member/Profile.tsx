@@ -42,7 +42,7 @@ export default function Profile() {
   }, []);
 
   return (
-    <DashboardLayout title="Member Portal" navItems={memberNavItems}>
+    <DashboardLayout title="Associate Portal" navItems={memberNavItems}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-navy">My Profile</h1>
         <p className="mt-1 text-sm text-charcoal/60">
@@ -76,11 +76,11 @@ export default function Profile() {
                   </div>
                   <div className="min-w-0">
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-light">
-                      Member profile
+                      Associate profile
                     </p>
                     <h2 className="truncate text-xl font-semibold sm:text-2xl">{member.name}</h2>
                     <p className="mt-1 text-sm text-white/70">
-                      Member code <span className="font-medium text-white">{member.memberCode}</span>
+                      Associate code <span className="font-medium text-white">{member.memberCode}</span>
                     </p>
                   </div>
                 </div>
@@ -125,7 +125,7 @@ export default function Profile() {
                 <ProfileField label="Date of Birth" value={formatDate(member.dateOfBirth)} />
                 <ProfileField label="Nominee" value={member.nomineeName ?? "-"} />
                 <ProfileField label="Relationship" value={member.relationship ?? "-"} />
-                <ProfileField label="Member Since" value={formatDate(member.createdAt)} />
+                <ProfileField label="Associate Since" value={formatDate(member.createdAt)} />
                 <ProfileField
                   label="Address"
                   value={member.address ?? "-"}
