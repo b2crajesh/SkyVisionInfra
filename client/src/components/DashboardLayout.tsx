@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth-context";
+import AssociateAvatar from "./AssociateAvatar";
 import Button from "./ui/Button";
 
 interface NavItem {
@@ -114,6 +115,13 @@ export default function DashboardLayout({
             </Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            {user?.role === "member" && user.memberId && (
+              <AssociateAvatar
+                memberId={user.memberId}
+                name={user.name ?? user.userId}
+                className="h-9 w-9 rounded-full border border-gold/30 bg-navy text-xs"
+              />
+            )}
             <span className="hidden text-sm font-medium text-charcoal sm:inline">
               {user?.name ?? user?.userId}
               {user?.memberCode && (

@@ -33,6 +33,7 @@ const networkMemberSelect = {
   name: true,
   memberCode: true,
   sponsorMemberId: true,
+  profilePhotoKey: true,
   status: true,
   rank: { select: { name: true } },
 } satisfies Prisma.MemberSelect;
@@ -45,6 +46,7 @@ interface NetworkNode {
   memberCode: string;
   status: string;
   rank: string;
+  profilePhotoUrl: string | null;
   sponsoredMembers: NetworkNode[];
 }
 
@@ -55,6 +57,7 @@ function toNetworkNode(member: NetworkMemberRecord): NetworkNode {
     memberCode: member.memberCode,
     status: member.status,
     rank: member.rank.name,
+    profilePhotoUrl: null,
     sponsoredMembers: [],
   };
 }
@@ -150,6 +153,9 @@ export async function getMyNetwork(req: Request, res: Response, next: NextFuncti
     }
 
     const sponsorChain: NetworkNode[] = [];
+    const profilePhotoKeys = new Map<string, string | null>([
+      [member.id, member.profilePhotoKey],
+    ]);
     const visited = new Set([member.id]);
     let sponsorId = member.sponsorMemberId;
     while (sponsorId && !visited.has(sponsorId)) {
@@ -159,6 +165,7 @@ export async function getMyNetwork(req: Request, res: Response, next: NextFuncti
         select: networkMemberSelect,
       });
       if (!sponsor) break;
+      profilePhotoKeys.set(sponsor.id, sponsor.profilePhotoKey);
       sponsorChain.unshift(toNetworkNode(sponsor));
       sponsorId = sponsor.sponsorMemberId;
     }
@@ -176,6 +183,7 @@ export async function getMyNetwork(req: Request, res: Response, next: NextFuncti
       for (const child of children) {
         if (visited.has(child.id)) continue;
         visited.add(child.id);
+        profilePhotoKeys.set(child.id, child.profilePhotoKey);
         const childNode = toNetworkNode(child);
         nodes.get(child.sponsorMemberId!)?.sponsoredMembers.push(childNode);
         nodes.set(child.id, childNode);
@@ -183,6 +191,13 @@ export async function getMyNetwork(req: Request, res: Response, next: NextFuncti
       }
       frontier = nextFrontier;
     }
+
+    await Promise.all(
+      [...sponsorChain, ...nodes.values()].map(async (node) => {
+        const key = profilePhotoKeys.get(node.id);
+        node.profilePhotoUrl = key ? await createProfilePhotoUrl(key) : null;
+      })
+    );
 
     res.json({ sponsorChain, member: tree });
   } catch (err) {
@@ -479,23 +494,42 @@ export async function updateMember(
       );
     }
 
-    const member = await prisma.member.update({
-      where: { id },
-      data: {
-        ...(input.name !== undefined ? { name: input.name } : {}),
-        ...(input.phone !== undefined ? { phone: input.phone } : {}),
-        ...(input.email !== undefined ? { email: input.email } : {}),
-        ...(input.address !== undefined ? { address: input.address } : {}),
-        ...(input.dateOfBirth !== undefined ? { dateOfBirth: new Date(input.dateOfBirth) } : {}),
-        ...(input.aadhaarNumber !== undefined ? { aadhaarNumber: input.aadhaarNumber } : {}),
-        ...(input.panNumber !== undefined ? { panNumber: input.panNumber } : {}),
-        ...(input.bookingAmount !== undefined ? { bookingAmount: input.bookingAmount } : {}),
-        ...(input.nomineeName !== undefined ? { nomineeName: input.nomineeName } : {}),
-        ...(input.relationship !== undefined ? { relationship: input.relationship } : {}),
-        ...(input.rankId !== undefined ? { rankId: input.rankId } : {}),
-        ...(input.sponsorMemberId !== undefined ? { sponsorMemberId: input.sponsorMemberId } : {}),
-      },
-      include: memberDetailInclude,
+    const member = await prisma.$transaction(async (tx) => {
+      const updatedMember = await tx.member.update({
+        where: { id },
+        data: {
+          ...(input.name !== undefined ? { name: input.name } : {}),
+          ...(input.phone !== undefined ? { phone: input.phone } : {}),
+          ...(input.email !== undefined ? { email: input.email } : {}),
+          ...(input.address !== undefined ? { address: input.address } : {}),
+          ...(input.dateOfBirth !== undefined ? { dateOfBirth: new Date(input.dateOfBirth) } : {}),
+          ...(input.aadhaarNumber !== undefined ? { aadhaarNumber: input.aadhaarNumber } : {}),
+          ...(input.panNumber !== undefined ? { panNumber: input.panNumber } : {}),
+          ...(input.bookingAmount !== undefined ? { bookingAmount: input.bookingAmount } : {}),
+          ...(input.nomineeName !== undefined ? { nomineeName: input.nomineeName } : {}),
+          ...(input.relationship !== undefined ? { relationship: input.relationship } : {}),
+          ...(input.rankId !== undefined ? { rankId: input.rankId } : {}),
+          ...(input.sponsorMemberId !== undefined ? { sponsorMemberId: input.sponsorMemberId } : {}),
+        },
+        include: memberDetailInclude,
+      });
+
+      if (input.bookingAmount !== undefined) {
+        const commissionAmount = calculateCommissionAmount(
+          input.bookingAmount,
+          JOINING_COMMISSION_PERCENTAGE
+        );
+        await tx.commission.updateMany({
+          where: { type: "JOINING", sourceMemberId: id },
+          data: {
+            baseAmount: input.bookingAmount,
+            percentage: JOINING_COMMISSION_PERCENTAGE,
+            ...calculateCommissionBreakdown(commissionAmount),
+          },
+        });
+      }
+
+      return updatedMember;
     });
 
     res.json({ member: serializeMember(member, member.user.userId) });

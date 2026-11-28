@@ -44,6 +44,7 @@ export interface MemberNetworkNode {
   name: string;
   status: string;
   rank: string;
+  profilePhotoUrl: string | null;
   sponsoredMembers: MemberNetworkNode[];
 }
 

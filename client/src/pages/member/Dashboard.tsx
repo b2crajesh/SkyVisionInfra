@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
+import AssociateAvatar from "../../components/AssociateAvatar";
 import Card from "../../components/ui/Card";
 import DataTable, { type Column } from "../../components/DataTable";
 import { memberNavItems } from "./memberNav";
@@ -100,12 +101,17 @@ function NetworkNodeCard({
   node: MemberNetworkNode;
   isCurrent?: boolean;
 }) {
+  const [photoFailed, setPhotoFailed] = useState(false);
   const initials = node.name
     .split(/\s+/)
     .slice(0, 2)
     .map((part) => part[0])
     .join("")
     .toUpperCase();
+
+  useEffect(() => {
+    setPhotoFailed(false);
+  }, [node.profilePhotoUrl]);
 
   return (
     <div
@@ -121,11 +127,20 @@ function NetworkNodeCard({
         </span>
       )}
       <div
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+        className={`flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold ${
           isCurrent ? "bg-gold text-white" : "bg-navy/10 text-navy"
         }`}
       >
-        {initials}
+        {node.profilePhotoUrl && !photoFailed ? (
+          <img
+            src={node.profilePhotoUrl}
+            alt={`${node.name} profile`}
+            className="h-full w-full object-cover"
+            onError={() => setPhotoFailed(true)}
+          />
+        ) : (
+          initials
+        )}
       </div>
       <p className="line-clamp-2 w-full text-xs font-semibold leading-tight text-navy">{node.name}</p>
       <p className="max-w-full truncate text-[10px] leading-none text-charcoal/60">{node.memberCode}</p>
@@ -238,16 +253,6 @@ export default function MemberDashboard() {
       .catch(() => {});
   }, []);
 
-  const memberInitials = member
-    ? member.name
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((part) => part[0])
-        .join("")
-        .toUpperCase() || "M"
-    : "";
-
   const matchingCommissions = useMemo(() => {
     const query = commissionSearch.trim().toLocaleLowerCase("en-IN");
     const filtered = commissions.filter((commission) => {
@@ -304,9 +309,12 @@ export default function MemberDashboard() {
               />
               <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-xl font-bold tracking-wide text-white shadow-soft backdrop-blur-sm">
-                    {memberInitials}
-                  </div>
+                  <AssociateAvatar
+                    memberId={member.id}
+                    name={member.name}
+                    hasPhoto={member.hasProfilePhoto}
+                    className="h-16 w-16 rounded-2xl border border-white/20 bg-white/10 text-xl shadow-soft backdrop-blur-sm"
+                  />
                   <div className="min-w-0">
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-light">
                       Associate profile
