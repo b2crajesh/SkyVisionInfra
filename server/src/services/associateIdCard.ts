@@ -19,6 +19,7 @@ const BRAND_CHARCOAL = "#25262B";
 const BRAND_GOLD = "#FFC928";
 const TEXT_MUTED = "#A6A7AC";
 const COMPANY_ADDRESS = "PD Mall, Padrauna, Kushinagar, UP";
+const COMPANY_WEBSITE = "https://skyvisioninfra.com";
 const LOGO_PATH = path.resolve(__dirname, "../../../client/public/sky-vision-logo.png");
 
 function getInitials(name: string): string {
@@ -143,38 +144,44 @@ export async function createAssociateIdCardPdf(
       lineBreak: false,
     });
 
-  document.rect(0, 190, CARD_WIDTH, CARD_HEIGHT - 190).fill("#303136");
-  document.image(qrCode, 13, 195, { fit: [34, 34] });
+  document.rect(0, 188, CARD_WIDTH, CARD_HEIGHT - 188).fill("#303136");
+  document.image(qrCode, 13, 191, { fit: [32, 32] });
   document
     .fillColor(TEXT_MUTED)
     .font("Helvetica-Bold")
     .fontSize(5)
-    .text("ASSOCIATE CODE", 55, 196);
+    .text("ASSOCIATE CODE", 53, 191);
   document
     .fillColor(BRAND_GOLD)
     .font("Helvetica-Bold")
     .fontSize(9)
-    .text(associate.memberCode, 55, 205, { width: CARD_WIDTH - 67, lineBreak: false });
+    .text(associate.memberCode, 53, 200, { width: CARD_WIDTH - 65, lineBreak: false });
   document
     .fillColor(TEXT_MUTED)
     .font("Helvetica-Bold")
     .fontSize(5)
-    .text("PHONE", 55, 219);
+    .text("PHONE", 53, 212);
   document
     .fillColor("#FFFFFF")
     .font("Helvetica")
     .fontSize(6.5)
-    .text(associate.phone || "Not provided", 55, 227, {
-      width: CARD_WIDTH - 67,
+    .text(associate.phone || "Not provided", 53, 220, {
+      width: CARD_WIDTH - 65,
       lineBreak: false,
     });
 
-  document.fillColor(TEXT_MUTED).font("Helvetica-Bold").fontSize(5).text("OFFICE", 12, 235);
+  document.fillColor(TEXT_MUTED).font("Helvetica-Bold").fontSize(5).text("OFFICE", 12, 229);
   document
     .fillColor("#FFFFFF")
     .font("Helvetica")
     .fontSize(5.5)
-    .text(COMPANY_ADDRESS, 37, 235, { width: CARD_WIDTH - 49, lineBreak: false });
+    .text(COMPANY_ADDRESS, 37, 229, { width: CARD_WIDTH - 49, lineBreak: false });
+  document.fillColor(TEXT_MUTED).font("Helvetica-Bold").fontSize(5).text("WEBSITE", 12, 236);
+  document
+    .fillColor("#FFFFFF")
+    .font("Helvetica")
+    .fontSize(5.5)
+    .text(COMPANY_WEBSITE, 37, 236, { width: CARD_WIDTH - 49, lineBreak: false });
   document.rect(0.5, 0.5, CARD_WIDTH - 1, CARD_HEIGHT - 1).lineWidth(1).stroke(BRAND_GOLD);
   document.end();
 
