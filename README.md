@@ -119,6 +119,13 @@ The API issues five-minute signed read URLs only after authentication and
 authorization; do not enable public bucket access. Set the R2 values as GoDaddy
 hosting secrets, then rebuild and publish the app.
 
+associates can download their own single-sided portrait CR80-size ID card PDF
+from **My Profile**; admins can download a card from an associate's detail page. Cards
+include the associate photo (or initials fallback), name, code, phone, rank,
+status, joining date, company address (PD Mall, Padrauna, Kushinagar, UP),
+company branding, and a QR code containing only the associate code. Downloads
+are authenticated and are not cached.
+
 The contact form saves submissions to the database, emails the configured
 inbox, and sends a confirmation to the email address entered by the visitor.
 Configure the SMTP settings above as hosting secrets; if either email fails,

@@ -3,6 +3,7 @@ import DashboardLayout from "../../components/DashboardLayout";
 import Card from "../../components/ui/Card";
 import ChangePasswordCard from "../../components/ChangePasswordCard";
 import MemberProfilePhoto from "../../components/MemberProfilePhoto";
+import DownloadIdCardButton from "../../components/DownloadIdCardButton";
 import { memberNavItems } from "./memberNav";
 import { api } from "../../lib/api";
 import type { Member } from "../../lib/types";
@@ -44,11 +45,19 @@ export default function Profile() {
 
   return (
     <DashboardLayout title="Associate Portal" navItems={memberNavItems}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-navy">My Profile</h1>
-        <p className="mt-1 text-sm text-charcoal/60">
-          Review your membership details and keep your account secure.
-        </p>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-navy">My Profile</h1>
+          <p className="mt-1 text-sm text-charcoal/60">
+            Review your membership details and keep your account secure.
+          </p>
+        </div>
+        {member && (
+          <DownloadIdCardButton
+            endpoint="/members/me/id-card"
+            filename={`associate-${member.memberCode}-id-card.pdf`}
+          />
+        )}
       </div>
       {loading && <p className="text-charcoal/60">Loading...</p>}
       {error && <p className="text-red-600">{error}</p>}

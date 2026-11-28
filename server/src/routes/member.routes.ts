@@ -11,6 +11,8 @@ import {
 import {
   createMember,
   deleteMember,
+  downloadAssociateIdCard,
+  downloadMyAssociateIdCard,
   getMemberById,
   getMemberProfilePhoto,
   getMyMember,
@@ -30,8 +32,15 @@ router.use(authenticate);
 router.get("/me/network", authorize("MEMBER"), getMyNetwork);
 router.get("/me", authorize("MEMBER"), getMyMember);
 router.get("/me/photo", authorize("MEMBER"), getMyProfilePhoto);
+router.get("/me/id-card", authorize("MEMBER"), downloadMyAssociateIdCard);
 router.post("/me/photo", authorize("MEMBER"), parseProfilePhotoUpload, uploadMyProfilePhoto);
 router.get("/", authorize("ADMIN"), validate({ query: listMembersQuerySchema }), listMembers);
+router.get(
+  "/:id/id-card",
+  authorize("ADMIN"),
+  validate({ params: idParamSchema }),
+  downloadAssociateIdCard
+);
 router.get(
   "/:id/photo",
   authorize("ADMIN"),

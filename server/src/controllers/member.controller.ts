@@ -14,7 +14,12 @@ import {
 import { sendMemberCredentialsWhatsApp } from "../services/whatsapp";
 import { sendMemberCredentialsEmail } from "../services/memberCredentialsEmail";
 import sharp from "sharp";
-import { createProfilePhotoUrl, storeProfilePhoto } from "../services/profilePhotoStorage";
+import {
+  createProfilePhotoUrl,
+  getProfilePhoto,
+  storeProfilePhoto,
+} from "../services/profilePhotoStorage";
+import { createAssociateIdCardPdf } from "../services/associateIdCard";
 import { CreateMemberInput, UpdateMemberInput } from "../validators/member.validators";
 
 const memberInclude = {
@@ -278,6 +283,62 @@ export async function getMemberProfilePhoto(
 ): Promise<void> {
   try {
     await sendProfilePhotoUrl(req.params.id, res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function sendAssociateIdCard(memberId: string, res: Response): Promise<void> {
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: {
+      name: true,
+      phone: true,
+      memberCode: true,
+      status: true,
+      createdAt: true,
+      profilePhotoKey: true,
+      rank: { select: { name: true } },
+    },
+  });
+  if (!member) {
+    throw new ApiError(404, "Associate not found");
+  }
+
+  const photo = member.profilePhotoKey ? await getProfilePhoto(member.profilePhotoKey) : null;
+  const pdf = await createAssociateIdCardPdf(member, photo);
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${member.memberCode}-id-card.pdf"`
+  );
+  res.setHeader("Cache-Control", "private, no-store");
+  res.send(pdf);
+}
+
+export async function downloadMyAssociateIdCard(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    if (!req.user?.memberId) {
+      throw new ApiError(404, "No associate profile linked to this account");
+    }
+    await sendAssociateIdCard(req.user.memberId, res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function downloadAssociateIdCard(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await sendAssociateIdCard(req.params.id, res);
   } catch (err) {
     next(err);
   }

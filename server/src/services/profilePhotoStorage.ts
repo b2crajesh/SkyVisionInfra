@@ -43,6 +43,20 @@ export async function storeProfilePhoto(key: string, image: Buffer): Promise<voi
   );
 }
 
+export async function getProfilePhoto(key: string): Promise<Buffer> {
+  const storage = getStorageConfig();
+  const result = await storage.client.send(
+    new GetObjectCommand({
+      Bucket: storage.bucket,
+      Key: key,
+    })
+  );
+  if (!result.Body) {
+    throw new ApiError(502, "Unable to retrieve the associate profile photo");
+  }
+  return Buffer.from(await result.Body.transformToByteArray());
+}
+
 export async function createProfilePhotoUrl(key: string): Promise<string> {
   const storage = getStorageConfig();
   return getSignedUrl(

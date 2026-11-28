@@ -5,6 +5,7 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import MemberProfilePhoto from "../../components/MemberProfilePhoto";
+import DownloadIdCardButton from "../../components/DownloadIdCardButton";
 import DataTable, { type Column } from "../../components/DataTable";
 import { adminNavItems } from "./adminNav";
 import { api } from "../../lib/api";
@@ -248,6 +249,11 @@ export default function MemberDetail() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <DownloadIdCardButton
+                    endpoint={`/members/${id}/id-card`}
+                    filename={`associate-${member.memberCode}-id-card.pdf`}
+                    className="!border-white/40 !text-white hover:!bg-white hover:!text-navy"
+                  />
                   <Button
                     variant="outline"
                     className="!border-white/40 !text-white hover:!bg-white hover:!text-navy"
