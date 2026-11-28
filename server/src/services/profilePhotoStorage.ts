@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -6,6 +7,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ApiError } from "../middleware/errorHandler";
 import { env } from "../utils/env";
+import { logError } from "../utils/logger";
 
 const SIGNED_URL_EXPIRY_SECONDS = 300;
 let client: S3Client | undefined;
@@ -41,6 +43,21 @@ export async function storeProfilePhoto(key: string, image: Buffer): Promise<voi
       CacheControl: "private, max-age=60",
     })
   );
+}
+
+export async function deleteProfilePhoto(key: string): Promise<void> {
+  const storage = getStorageConfig();
+  try {
+    await storage.client.send(
+      new DeleteObjectCommand({
+        Bucket: storage.bucket,
+        Key: key,
+      })
+    );
+  } catch (error) {
+    logError("profile_photo.delete.failed", error);
+    throw new ApiError(502, "Unable to delete the profile photo; associate deletion was cancelled");
+  }
 }
 
 export async function getProfilePhoto(key: string): Promise<Buffer> {

@@ -16,6 +16,7 @@ import { sendMemberCredentialsEmail } from "../services/memberCredentialsEmail";
 import sharp from "sharp";
 import {
   createProfilePhotoUrl,
+  deleteProfilePhoto,
   getProfilePhoto,
   storeProfilePhoto,
 } from "../services/profilePhotoStorage";
@@ -665,7 +666,10 @@ export async function deleteMember(req: Request, res: Response, next: NextFuncti
       }
       await tx.member.delete({ where: { id } });
       await tx.user.delete({ where: { id: member.userId } });
-    });
+      if (member.profilePhotoKey) {
+        await deleteProfilePhoto(member.profilePhotoKey);
+      }
+    }, { timeout: 15_000 });
 
     res.json({ message: "Associate deleted" });
   } catch (err) {

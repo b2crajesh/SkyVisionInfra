@@ -118,6 +118,8 @@ Associate photos are converted to WebP and stored in the private R2 bucket.
 The API issues five-minute signed read URLs only after authentication and
 authorization; do not enable public bucket access. Set the R2 values as GoDaddy
 hosting secrets, then rebuild and publish the app.
+Deleting an associate also deletes their R2 photo; if photo deletion fails,
+the associate deletion is cancelled.
 
 associates can download their own single-sided portrait CR80-size ID card PDF
 from **My Profile**; admins can download a card from an associate's detail page. Cards

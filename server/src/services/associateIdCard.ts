@@ -55,7 +55,7 @@ export async function createAssociateIdCardPdf(
       width: 180,
     }),
     photo
-      ? sharp(photo).resize(320, 400, { fit: "cover" }).jpeg({ quality: 82 }).toBuffer()
+      ? sharp(photo).resize(354, 396, { fit: "cover" }).jpeg({ quality: 82 }).toBuffer()
       : Promise.resolve(null),
   ]);
   const logo = await sharp(logoSource)
@@ -98,7 +98,7 @@ export async function createAssociateIdCardPdf(
   document.rect(CARD_WIDTH - 7, 68, 7, 120).fill(BRAND_GOLD);
   document.rect(47, 74, 59, 66).fill("#F1F5F9");
   if (photoJpeg) {
-    document.image(photoJpeg, 47, 74, { fit: [59, 66] });
+    document.image(photoJpeg, 47, 74, { width: 59, height: 66 });
   } else {
     document
       .fillColor(BRAND_CHARCOAL)
