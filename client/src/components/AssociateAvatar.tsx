@@ -6,6 +6,7 @@ interface AssociateAvatarProps {
   memberId: string;
   name: string;
   hasPhoto?: boolean;
+  photoEndpoint?: string;
   className: string;
 }
 
@@ -13,6 +14,7 @@ export default function AssociateAvatar({
   memberId,
   name,
   hasPhoto,
+  photoEndpoint = "/members/me/photo",
   className,
 }: AssociateAvatarProps) {
   const [photoUrl, setPhotoUrl] = useState("");
@@ -36,7 +38,7 @@ export default function AssociateAvatar({
     };
 
     api
-      .get<{ url: string }>("/members/me/photo")
+      .get<{ url: string }>(photoEndpoint)
       .then(({ data }) => {
         if (active) setPhotoUrl(data.url);
       })
@@ -49,7 +51,7 @@ export default function AssociateAvatar({
     return () => {
       active = false;
     };
-  }, [memberId, hasPhoto]);
+  }, [memberId, hasPhoto, photoEndpoint]);
 
   return (
     <div

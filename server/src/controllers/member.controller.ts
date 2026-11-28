@@ -64,16 +64,37 @@ function toNetworkNode(member: NetworkMemberRecord): NetworkNode {
 
 export async function listMembers(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { search, status, sortBy, sortOrder, page, pageSize, forSponsor } = req.query as Record<
-      string,
-      string | undefined
-    >;
+    const {
+      search,
+      status,
+      createdFrom,
+      createdBefore,
+      sortBy,
+      sortOrder,
+      page,
+      pageSize,
+      forSponsor,
+    } = req.query as Record<string, string | undefined>;
 
     const isSponsorLookup = forSponsor === "true";
+
+    if (
+      createdFrom &&
+      createdBefore &&
+      new Date(createdFrom).getTime() >= new Date(createdBefore).getTime()
+    ) {
+      throw new ApiError(400, "The associate created-date range is invalid");
+    }
 
     const where: Prisma.MemberWhereInput = {};
     if (status) {
       where.status = status as Prisma.MemberWhereInput["status"];
+    }
+    if (createdFrom || createdBefore) {
+      where.createdAt = {
+        ...(createdFrom ? { gte: new Date(createdFrom) } : {}),
+        ...(createdBefore ? { lt: new Date(createdBefore) } : {}),
+      };
     }
     if (isSponsorLookup) {
       where.status = "ACTIVE";

@@ -8,8 +8,14 @@ import { adminNavItems } from "./adminNav";
 import { api } from "../../lib/api";
 import type { Member } from "../../lib/types";
 import Badge from "../../components/ui/Badge";
+import AssociateAvatar from "../../components/AssociateAvatar";
 
 const PAGE_SIZE = 10;
+
+function startOfLocalDay(value: string, daysOffset = 0): string {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day + daysOffset).toISOString();
+}
 
 export default function Members() {
   const navigate = useNavigate();
@@ -18,13 +24,23 @@ export default function Members() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
   const [sort, setSort] = useState("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const invalidDateRange = Boolean(createdFrom && createdTo && createdFrom > createdTo);
 
   useEffect(() => {
+    if (invalidDateRange) {
+      setLoading(false);
+      return;
+    }
+
     let active = true;
     setLoading(true);
+    setLoadError("");
     api
       .get<{
         members: Member[];
@@ -33,6 +49,8 @@ export default function Members() {
         params: {
           search: search || undefined,
           status: status || undefined,
+          createdFrom: createdFrom ? startOfLocalDay(createdFrom) : undefined,
+          createdBefore: createdTo ? startOfLocalDay(createdTo, 1) : undefined,
           sortBy: sort,
           sortOrder: sortDir,
           page,
@@ -44,11 +62,14 @@ export default function Members() {
         setItems(data.members);
         setTotal(data.pagination.total);
       })
+      .catch(() => {
+        if (active) setLoadError("Unable to load associates. Please try again.");
+      })
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
-  }, [search, status, sort, sortDir, page]);
+  }, [search, status, createdFrom, createdTo, sort, sortDir, page, invalidDateRange]);
 
   const handleSort = (key: string) => {
     if (sort === key) {
@@ -60,6 +81,19 @@ export default function Members() {
   };
 
   const columns: Column<Member>[] = [
+    {
+      key: "photo",
+      header: "Photo",
+      render: (m) => (
+        <AssociateAvatar
+          memberId={m.id}
+          name={m.name}
+          hasPhoto={m.hasProfilePhoto}
+          photoEndpoint={`/members/${m.id}/photo`}
+          className="h-10 w-10 rounded-full border border-slate-200 bg-navy text-xs"
+        />
+      ),
+    },
     { key: "memberCode", header: "Code", sortable: true, render: (m) => m.memberCode },
     { key: "name", header: "Name", sortable: true, render: (m) => m.name },
     { key: "sponsor", header: "Sponsor", render: (m) => m.sponsor?.name ?? "-" },
@@ -105,7 +139,7 @@ export default function Members() {
       </div>
 
       <Card className="mb-5">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-end">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 sm:items-end">
           <div>
             <label htmlFor="member-search" className="mb-1.5 block text-xs font-semibold text-charcoal/70">
               Search associates
@@ -140,7 +174,44 @@ export default function Members() {
               <option value="INACTIVE">Inactive</option>
             </select>
           </div>
+          <div>
+            <label htmlFor="member-created-from" className="mb-1.5 block text-xs font-semibold text-charcoal/70">
+              Created from
+            </label>
+            <input
+              id="member-created-from"
+              type="date"
+              max={createdTo || undefined}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-navy shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20"
+              value={createdFrom}
+              onChange={(event) => {
+                setPage(1);
+                setCreatedFrom(event.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="member-created-to" className="mb-1.5 block text-xs font-semibold text-charcoal/70">
+              Created to
+            </label>
+            <input
+              id="member-created-to"
+              type="date"
+              min={createdFrom || undefined}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-navy shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20"
+              value={createdTo}
+              onChange={(event) => {
+                setPage(1);
+                setCreatedTo(event.target.value);
+              }}
+            />
+          </div>
         </div>
+        {invalidDateRange && (
+          <p role="alert" className="mt-3 text-sm text-red-600">
+            The start date must be on or before the end date.
+          </p>
+        )}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
           <p className="text-sm font-medium text-navy">
             {total.toLocaleString("en-IN")} {total === 1 ? "associate" : "associates"}
@@ -160,7 +231,10 @@ export default function Members() {
           sortDir={sortDir}
           onSort={handleSort}
           onRowClick={(m) => navigate(`/admin/members/${m.id}`)}
-          emptyMessage={loading ? "Loading associates..." : "No associates found."}
+          emptyMessage={
+            loadError ||
+            (loading ? "Loading associates..." : "No associates found.")
+          }
         />
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-charcoal/60">

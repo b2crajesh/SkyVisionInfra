@@ -44,6 +44,8 @@ export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;
 export const listMembersQuerySchema = z.object({
   search: z.string().optional(),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]).optional(),
+  createdFrom: z.string().datetime().optional(),
+  createdBefore: z.string().datetime().optional(),
   sortBy: z.enum(["name", "createdAt", "memberCode", "bookingAmount"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
   page: z.coerce.number().int().positive().optional(),
