@@ -37,12 +37,11 @@ export interface SerializedMember {
   }[];
 }
 
-/**
- * Central place mapping a Prisma Member (optionally with `rank`/`sponsor`
- * relations included) into an API-safe object. Sensitive identifiers
- * (aadhaar/PAN) are masked here so no route can accidentally leak them.
- */
-export function serializeMember(member: MemberWithRelations, userIdForLogin?: string): SerializedMember {
+function serializeMemberData(
+  member: MemberWithRelations,
+  userIdForLogin: string | undefined,
+  maskSensitiveIdentifiers: boolean
+): SerializedMember {
   return {
     id: member.id,
     memberCode: member.memberCode,
@@ -53,8 +52,8 @@ export function serializeMember(member: MemberWithRelations, userIdForLogin?: st
     hasProfilePhoto: Boolean(member.profilePhotoKey),
     address: member.address,
     dateOfBirth: member.dateOfBirth.toISOString(),
-    aadhaarNumber: maskAadhaar(member.aadhaarNumber),
-    panNumber: maskPan(member.panNumber),
+    aadhaarNumber: maskSensitiveIdentifiers ? maskAadhaar(member.aadhaarNumber) : member.aadhaarNumber,
+    panNumber: maskSensitiveIdentifiers ? maskPan(member.panNumber) : member.panNumber,
     bookingAmount: member.bookingAmount.toString(),
     nomineeName: member.nomineeName,
     relationship: member.relationship,
@@ -74,4 +73,24 @@ export function serializeMember(member: MemberWithRelations, userIdForLogin?: st
       saleDate: s.saleDate.toISOString(),
     })),
   };
+}
+
+/**
+ * Safe for general API responses: sensitive identifiers remain masked.
+ */
+export function serializeMember(
+  member: MemberWithRelations,
+  userIdForLogin?: string
+): SerializedMember {
+  return serializeMemberData(member, userIdForLogin, true);
+}
+
+/**
+ * Use only for member detail responses behind administrator authorization.
+ */
+export function serializeAdminMember(
+  member: MemberWithRelations,
+  userIdForLogin?: string
+): SerializedMember {
+  return serializeMemberData(member, userIdForLogin, false);
 }

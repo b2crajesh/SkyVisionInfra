@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { ApiError } from "../middleware/errorHandler";
-import { serializeMember } from "../services/memberSerializer";
+import { serializeAdminMember, serializeMember } from "../services/memberSerializer";
 import { generateNextMemberCode } from "../services/memberIdGenerator";
 import { generateTempPassword } from "../utils/password";
 import { hashPassword } from "../utils/hash";
@@ -241,7 +241,7 @@ export async function getMemberById(req: Request, res: Response, next: NextFunct
     if (!member) {
       throw new ApiError(404, "Associate not found");
     }
-    res.json({ member: serializeMember(member, member.user.userId) });
+    res.json({ member: serializeAdminMember(member, member.user.userId) });
   } catch (err) {
     next(err);
   }
