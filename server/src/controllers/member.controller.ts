@@ -13,6 +13,8 @@ import {
 } from "../services/commission";
 import { sendMemberCredentialsWhatsApp } from "../services/whatsapp";
 import { sendMemberCredentialsEmail } from "../services/memberCredentialsEmail";
+import sharp from "sharp";
+import { createProfilePhotoUrl, storeProfilePhoto } from "../services/profilePhotoStorage";
 import { CreateMemberInput, UpdateMemberInput } from "../validators/member.validators";
 
 const memberInclude = {
@@ -199,6 +201,122 @@ export async function getMemberById(req: Request, res: Response, next: NextFunct
       throw new ApiError(404, "Associate not found");
     }
     res.json({ member: serializeMember(member, member.user.userId) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function sendProfilePhotoUrl(memberId: string, res: Response): Promise<void> {
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { profilePhotoKey: true },
+  });
+  if (!member) {
+    throw new ApiError(404, "Associate not found");
+  }
+  if (!member.profilePhotoKey) {
+    throw new ApiError(404, "No profile photo has been uploaded");
+  }
+  res.json({ url: await createProfilePhotoUrl(member.profilePhotoKey) });
+}
+
+export async function getMyProfilePhoto(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    if (!req.user?.memberId) {
+      throw new ApiError(404, "No associate profile linked to this account");
+    }
+    await sendProfilePhotoUrl(req.user.memberId, res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getMemberProfilePhoto(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await sendProfilePhotoUrl(req.params.id, res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function saveProfilePhoto(
+  memberId: string,
+  req: Request,
+  res: Response
+): Promise<void> {
+  const contentType = req.header("content-type")?.split(";")[0].trim().toLowerCase();
+  if (!contentType || !["image/jpeg", "image/png", "image/webp"].includes(contentType)) {
+    throw new ApiError(415, "Choose a JPEG, PNG, or WebP image");
+  }
+  if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+    throw new ApiError(400, "The uploaded photo is empty or invalid");
+  }
+
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { id: true },
+  });
+  if (!member) {
+    throw new ApiError(404, "Associate not found");
+  }
+
+  let optimizedImage: Buffer;
+  try {
+    const metadata = await sharp(req.body, { limitInputPixels: 40_000_000 }).metadata();
+    if (!["jpeg", "png", "webp"].includes(metadata.format ?? "")) {
+      throw new ApiError(415, "Choose a JPEG, PNG, or WebP image");
+    }
+    optimizedImage = await sharp(req.body, { limitInputPixels: 40_000_000 })
+      .rotate()
+      .resize(512, 512, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+  } catch (err) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    throw new ApiError(400, "The uploaded file is not a valid image");
+  }
+
+  const key = `member-photos/${memberId}/profile.webp`;
+  await storeProfilePhoto(key, optimizedImage);
+  await prisma.member.update({
+    where: { id: memberId },
+    data: { profilePhotoKey: key },
+  });
+  res.json({ url: await createProfilePhotoUrl(key), hasProfilePhoto: true });
+}
+
+export async function uploadMyProfilePhoto(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    if (!req.user?.memberId) {
+      throw new ApiError(404, "No associate profile linked to this account");
+    }
+    await saveProfilePhoto(req.user.memberId, req, res);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function uploadMemberProfilePhoto(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await saveProfilePhoto(req.params.id, req, res);
   } catch (err) {
     next(err);
   }

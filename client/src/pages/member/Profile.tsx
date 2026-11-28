@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import Card from "../../components/ui/Card";
 import ChangePasswordCard from "../../components/ChangePasswordCard";
+import MemberProfilePhoto from "../../components/MemberProfilePhoto";
 import { memberNavItems } from "./memberNav";
 import { api } from "../../lib/api";
 import type { Member } from "../../lib/types";
@@ -65,15 +66,24 @@ export default function Profile() {
               />
               <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-xl font-bold tracking-wide text-white shadow-soft backdrop-blur-sm">
-                    {member.name
-                      .trim()
-                      .split(/\s+/)
-                      .slice(0, 2)
-                      .map((part) => part[0])
-                      .join("")
-                      .toUpperCase() || "M"}
-                  </div>
+                  <MemberProfilePhoto
+                    endpoint="/members/me"
+                    hasPhoto={member.hasProfilePhoto}
+                    initials={
+                      member.name
+                        .trim()
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((part) => part[0])
+                        .join("")
+                        .toUpperCase() || "M"
+                    }
+                    onUploaded={() =>
+                      setMember((current) =>
+                        current ? { ...current, hasProfilePhoto: true } : current
+                      )
+                    }
+                  />
                   <div className="min-w-0">
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-light">
                       Associate profile

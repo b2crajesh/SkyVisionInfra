@@ -108,6 +108,16 @@ commit production values to `.env` files:
 | `SMTP_PASSWORD` | SMTP account password or app password |
 | `CONTACT_EMAIL_FROM` | `support@skyvisioninfra.com` (defaults to `SMTP_USER`) |
 | `CONTACT_EMAIL_TO` | Inbox for contact submissions (defaults to `support@skyvisioninfra.com`) |
+| `R2_ACCOUNT_ID` | Cloudflare account ID for the R2 S3-compatible endpoint |
+| `R2_ACCESS_KEY_ID` | R2 API token access key ID |
+| `R2_SECRET_ACCESS_KEY` | Matching R2 API token secret |
+| `R2_BUCKET` | Exact name of the private R2 bucket |
+| `R2_REGION` | `auto` |
+
+Associate photos are converted to WebP and stored in the private R2 bucket.
+The API issues five-minute signed read URLs only after authentication and
+authorization; do not enable public bucket access. Set the R2 values as GoDaddy
+hosting secrets, then rebuild and publish the app.
 
 The contact form saves submissions to the database, emails the configured
 inbox, and sends a confirmation to the email address entered by the visitor.
@@ -138,11 +148,11 @@ must not be served publicly or committed with customer data.
 
 ### Database safety
 
-The current Prisma schema is newer than the original checked-in migration. The
-additional migration in this repository adds the missing
-`mustChangePassword`, `phone`, and `email` columns and the `Commission` table.
-It is additive and uses existence checks, but it does not replace inspecting
-the target database.
+The current Prisma schema is newer than the original checked-in migration.
+Committed additive migrations add the missing `mustChangePassword`, `phone`,
+and `email` columns, the `Commission` table, and the nullable `profilePhotoKey`
+column used by associate photos. They do not replace inspecting the target
+database.
 
 - Take and verify a fresh database backup first.
 - Confirm the database is the one used by this app and that the original

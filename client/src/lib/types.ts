@@ -23,6 +23,7 @@ export interface Member {
   name: string;
   phone?: string;
   email?: string;
+  hasProfilePhoto?: boolean;
   sponsor?: { id: string; name: string; memberCode: string } | null;
   rank?: { id: string; name: string } | null;
   bookingAmount: string;

@@ -84,6 +84,7 @@ model Member {
   name             String
   phone            String        @default("")
   email            String        @default("")
+  profilePhotoKey  String?
   address          String
   dateOfBirth      DateTime
   aadhaarNumber    String

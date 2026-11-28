@@ -4,6 +4,7 @@ import DashboardLayout from "../../components/DashboardLayout";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import MemberProfilePhoto from "../../components/MemberProfilePhoto";
 import DataTable, { type Column } from "../../components/DataTable";
 import { adminNavItems } from "./adminNav";
 import { api } from "../../lib/api";
@@ -210,9 +211,16 @@ export default function MemberDetail() {
               />
               <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-xl font-bold tracking-wide text-white shadow-soft backdrop-blur-sm">
-                    {memberInitials}
-                  </div>
+                  <MemberProfilePhoto
+                    endpoint={`/members/${id}`}
+                    hasPhoto={member.hasProfilePhoto}
+                    initials={memberInitials}
+                    onUploaded={() =>
+                      setMember((current) =>
+                        current ? { ...current, hasProfilePhoto: true } : current
+                      )
+                    }
+                  />
                   <div className="min-w-0">
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-light">
                       Associate profile

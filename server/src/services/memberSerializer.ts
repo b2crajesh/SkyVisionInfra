@@ -14,6 +14,7 @@ export interface SerializedMember {
   name: string;
   phone: string;
   email: string;
+  hasProfilePhoto: boolean;
   address: string;
   dateOfBirth: string;
   aadhaarNumber: string;
@@ -49,6 +50,7 @@ export function serializeMember(member: MemberWithRelations, userIdForLogin?: st
     name: member.name,
     phone: member.phone,
     email: member.email,
+    hasProfilePhoto: Boolean(member.profilePhotoKey),
     address: member.address,
     dateOfBirth: member.dateOfBirth.toISOString(),
     aadhaarNumber: maskAadhaar(member.aadhaarNumber),
