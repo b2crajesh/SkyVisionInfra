@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import Card from "../../components/ui/Card";
 import FormField from "../../components/FormField";
@@ -29,6 +30,9 @@ const RELATIONSHIP_OPTIONS = [
   "OTHER",
 ] as const;
 
+const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
 const initialValues: MemberFormValues = {
   name: "",
   phone: "",
@@ -50,16 +54,32 @@ export default function AddMember() {
   const [errors, setErrors] = useState<MemberFormErrors>({});
   const [ranks, setRanks] = useState<Rank[]>([]);
   const [sponsor, setSponsor] = useState<DropdownOption | null>(null);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState("");
+  const [photoError, setPhotoError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{
+    memberId: string;
     userId: string;
     tempPassword: string;
+    photoUploadError?: string;
     delivery: { email: "sent" | "failed" | "skipped"; whatsapp: "sent" | "failed" | "skipped" };
   } | null>(null);
 
   useEffect(() => {
     api.get<{ ranks: Rank[] }>("/ranks").then(({ data }) => setRanks(data.ranks));
   }, []);
+
+  useEffect(() => {
+    if (!photo) {
+      setPhotoPreview("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(photo);
+    setPhotoPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [photo]);
 
   const update = (field: keyof MemberFormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -78,8 +98,27 @@ export default function AddMember() {
     return data.members.map((s) => ({ id: s.id, label: `${s.memberCode} - ${s.name}` }));
   };
 
+  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedPhoto = event.currentTarget.files?.[0];
+    event.currentTarget.value = "";
+    if (!selectedPhoto) return;
+
+    if (!ACCEPTED_PHOTO_TYPES.has(selectedPhoto.type)) {
+      setPhotoError("Choose a JPEG, PNG, or WebP image.");
+      return;
+    }
+    if (selectedPhoto.size > MAX_PHOTO_SIZE) {
+      setPhotoError("Photo must be 5 MB or smaller.");
+      return;
+    }
+
+    setPhotoError("");
+    setPhoto(selectedPhoto);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (photoError) return;
     const validationErrors = validateMemberForm(values);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
@@ -87,6 +126,7 @@ export default function AddMember() {
     setSubmitting(true);
     try {
       const { data } = await api.post<{
+        member: { id: string };
         credentials: { userId: string; tempPassword: string };
         delivery: {
           email: "sent" | "failed" | "skipped";
@@ -106,9 +146,25 @@ export default function AddMember() {
         relationship: values.relationship,
         rankId: values.rankId,
       });
+      let photoUploadError: string | undefined;
+      if (photo) {
+        try {
+          await api.post(`/members/${data.member.id}/photo`, photo, {
+            headers: { "Content-Type": photo.type },
+          });
+        } catch (uploadError) {
+          const response = axios.isAxiosError<{ message?: string }>(uploadError)
+            ? uploadError.response?.data
+            : undefined;
+          photoUploadError =
+            response?.message ?? "The associate was created, but the photo upload failed.";
+        }
+      }
       setResult({
+        memberId: data.member.id,
         userId: data.credentials.userId,
         tempPassword: data.credentials.tempPassword,
+        photoUploadError,
         delivery: data.delivery,
       });
     } catch (err) {
@@ -129,6 +185,8 @@ export default function AddMember() {
   const resetForm = () => {
     setValues(initialValues);
     setSponsor(null);
+    setPhoto(null);
+    setPhotoError("");
     setErrors({});
     setResult(null);
   };
@@ -199,6 +257,70 @@ export default function AddMember() {
                     error={errors.address}
                     onChange={(e) => update("address", e.target.value)}
                   />
+                </div>
+                <div className="mb-4 sm:col-span-2">
+                  <label
+                    htmlFor="associate-photo"
+                    className="mb-1.5 block text-sm font-medium text-charcoal"
+                  >
+                    Profile photo <span className="font-normal text-charcoal/55">(optional)</span>
+                  </label>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-navy text-lg font-semibold text-white">
+                      {photoPreview ? (
+                        <img
+                          src={photoPreview}
+                          alt="Selected associate profile"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        values.name
+                          .trim()
+                          .split(/\s+/)
+                          .slice(0, 2)
+                          .map((part) => part[0])
+                          .join("")
+                          .toUpperCase() || "A"
+                      )}
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="associate-photo"
+                        className="inline-flex cursor-pointer items-center rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-navy transition hover:border-gold hover:bg-gold/5"
+                      >
+                        {photo ? "Choose a different photo" : "Choose photo"}
+                      </label>
+                      <input
+                        id="associate-photo"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="sr-only"
+                        disabled={submitting}
+                        onChange={handlePhotoChange}
+                      />
+                      <p className="mt-1 text-xs text-charcoal/55">
+                        JPEG, PNG, or WebP; maximum 5 MB.
+                      </p>
+                    </div>
+                    {photo && (
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-red-600 hover:text-red-700"
+                        disabled={submitting}
+                        onClick={() => {
+                          setPhoto(null);
+                          setPhotoError("");
+                        }}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {photoError && (
+                    <p role="alert" className="mt-1 text-xs text-red-600">
+                      {photoError}
+                    </p>
+                  )}
                 </div>
                 <FormField
                   label="Aadhaar Number"
@@ -344,6 +466,17 @@ export default function AddMember() {
           <p>Temporary Password: {result?.tempPassword}</p>
         </div>
         <div className="mt-4 space-y-1">
+          {result?.photoUploadError && (
+            <div role="alert" className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">
+              <p>{result.photoUploadError}</p>
+              <Link
+                to={`/admin/members/${result.memberId}`}
+                className="mt-1 inline-block font-semibold underline underline-offset-2"
+              >
+                Open associate profile to upload the photo
+              </Link>
+            </div>
+          )}
           <p>Email delivery: {result?.delivery.email}</p>
           <p>WhatsApp delivery: {result?.delivery.whatsapp}</p>
           {(result?.delivery.email !== "sent" || result?.delivery.whatsapp !== "sent") && (
